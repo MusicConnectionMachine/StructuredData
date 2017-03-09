@@ -2,7 +2,7 @@
   "name": "scripts",
   "version": "1.0.0",
   "description": "",
-  "main": "crawlReddit.js",
+  "main": "dbpedia_Classical_musicians_by_nationality.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
