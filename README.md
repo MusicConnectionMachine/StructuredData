@@ -1,3 +1,7 @@
-# Project A / Group 1 - Structured Data [![Join the chat at https://gitter.im/MusicConnectionMachine/StructuredData](https://badges.gitter.im/MusicConnectionMachine/StructuredData.svg)](https://gitter.im/MusicConnectionMachine/StructuredData?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+This script scrapes musicians from "http://dbpedia.org/page/Category:Classical_musicians_by_nationality".
 
- In this project we will be scanning structured online resources such as DBPedia, Worldcat, MusicBrainz, IMSLP and other databases
+To run it, simply type: 
+
+$> node dbpedia_Classical_musicians_by_nationality.js
+
+It will produce an outputfile dbpedia_Classical_musicians_by_nationality.json, that contains all the musicians.
