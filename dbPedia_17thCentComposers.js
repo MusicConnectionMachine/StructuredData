@@ -24,7 +24,7 @@ server.listen(port, hostname, function() {
     var newObj = {
         table: []
     };
-    fs.readFile('myjsonfile2.json', 'utf-8', function(err, array) {
+    fs.readFile('dbPedia_17thCentComposers.json', 'utf-8', function(err, array) {
         if (err) throw err
         newObj.table.push({
             name: "dummyname",
