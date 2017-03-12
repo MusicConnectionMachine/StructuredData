@@ -1,3 +1,15 @@
-# Project A / Group 1 - Structured Data [![Join the chat at https://gitter.im/MusicConnectionMachine/StructuredData](https://badges.gitter.im/MusicConnectionMachine/StructuredData.svg)](https://gitter.im/MusicConnectionMachine/StructuredData?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+This script will scrape musicians from the URL "http://dbpedia.org/page/Category:Classical_musicians_by_nationality".
 
- In this project we will be scanning structured online resources such as DBPedia, Worldcat, MusicBrainz, IMSLP and other databases
+It will save the data in the output-file "dbpedia_Classical_musicians_by_nationality.json". The structure of the json file is the following:
+{"name": String,
+"nationality": String,
+"dateOfBirth": Date(yyyy-dd-mm),
+"dateOfDeath": Date(yyyy-dd-mm),
+"placeOfBirth": String,
+"placeOfDeath":String,
+"instrument": String[],
+"psuedonym":String[],
+"work":String[],
+"release":String[],
+"tag":String[],
+"link": String}
