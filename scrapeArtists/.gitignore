@@ -1,0 +1,11 @@
+# Dependency directories
+node_modules
+
+# artists output
+artistsFromRecordings.json
+
+#package.json
+package.json
+
+# .idea
+.idea/
