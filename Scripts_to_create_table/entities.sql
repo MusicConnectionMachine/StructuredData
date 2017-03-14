@@ -5,6 +5,5 @@ CREATE TABLE entities(
    pseudonym text[],
    work text[],
    release text[],
-   source_link text NOT NULL
+   source_link text NOT NULL   
 );
-
