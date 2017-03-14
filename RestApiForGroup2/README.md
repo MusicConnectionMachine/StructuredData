@@ -1,5 +1,5 @@
 Server which responds to REST API requests from the group which mines the unstructured data
-Code Example
+URIs supported:
 http://127.0.0.1:3000/entities/ - HTTP method GET fetches all the entries in the database
 http://127.0.0.1:3000/entities/entity/:id  HTTP method GET fetches entry in the database whose entity id matches id
 http://127.0.0.1:3000/entities/entity/:id  HTTP method PUT updates entry in the database whose entity id matches id
