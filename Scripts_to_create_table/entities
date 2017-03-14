@@ -1,0 +1,10 @@
+CREATE SEQUENCE entities_seq;
+CREATE TABLE entities(
+   entity_id integer PRIMARY KEY default nextval('entities_seq'),
+   name text NOT NULL,
+   pseudonym text[],
+   work text[],
+   release text[],
+   source_link text NOT NULL
+);
+
