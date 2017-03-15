@@ -4,26 +4,29 @@ const express = require('express');
 const router = express.Router();
 const path = require('path');
 const body_parser = require('body-parser');
-const  HttpStatus  =  require('http-status-codes');
+const HttpStatus  = require('http-status-codes');
 const hostname = '127.0.0.1';
 const port = 3000;
+var config = require(__dirname +'/cfg/config.template.js');
 
 var app = express();
-app.use(express.static(__dirname + '/public'));
+app.use(express.static(__dirname +'/public'));
 app.use(body_parser.json());
 app.use(body_parser.urlencoded({
     extended: true
 }));
 
-var connectionString = {
-    host: 'localhost',
-    port: 5432,
-    database: 'postgres',
-    user: 'postgres',
-    password: '1234',
-};
+//construct the connection string in the form :
+//"postgres://username:password@host:port/database"
+function constructConnStr(config){
+    var connString = "postgres://"+config.username+":"+config.password+
+                     "@"+config.hostname+":"+config.port+"/"+config.database;
+    console.log("connection string ",connString);
+    return connString;
+}
 
-const psqlclient = new pg.Client(connectionString);
+//connect to database
+const psqlclient = new pg.Client(constructConnStr(config));
 psqlclient.connect(function(err, psqlclient) {
     if (err) {
         console.log(err);
@@ -31,7 +34,6 @@ psqlclient.connect(function(err, psqlclient) {
         console.log("Server is connected to database")
     }
 });
-
 app.post("/entities", function(req, res) {
     var entity = req.body;
     var pseudonames = [];
@@ -50,7 +52,6 @@ app.post("/entities", function(req, res) {
     for (item of entity.srcLink) {
         srcLink.push(item);
     }
-    console.log(pseudonames);
     psqlclient.query('INSERT INTO "entities"' +
         ' (name,pseudonym,work,release,source_link)' +
         ' VALUES' +
