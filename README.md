@@ -1,4 +1,7 @@
-# Project A / Group 1 - Structured Data
+Scrapes the information of composers that were born between 1620 and 1820 from Musicbrainz database. 
+The IDs will be used to scrape following details of classical composers
+name/placeofBirth/dateOfBirth/placeOfDeath/dateOfDeath/pseudonym/works/recordings/releases/tags/ 
 
-[![Join the chat at https://gitter.im/MusicConnectionMachine/StructuredData](https://badges.gitter.im/MusicConnectionMachine/StructuredData.svg)](https://gitter.im/MusicConnectionMachine/StructuredData?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
- In this project we will be scanning structured online resources such as DBPedia, Worldcat, MusicBrainz, IMSLP and other databases
+
+
+
