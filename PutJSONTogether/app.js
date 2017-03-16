@@ -2,11 +2,9 @@ var fs = require("fs");
 console.log("\n *START* \n");
 var content = "artists.json";
 
-var musicians = [];
-var newObj = {};
-
 function convertToInformation(content) {
     fs.readFile(content, 'utf8', function readFileCallback(err, data) {
+        let musicians = [];
         if (err) {
             console.log(err);
             return;
@@ -16,16 +14,22 @@ function convertToInformation(content) {
         arrayofObj = obj.table.length;
 
         for (i = 0; i < obj.table.length; i++) {
-            newObj = {};
             if (obj.table[i].hasOwnProperty("aboutartist")) {
+                let newObj = {
+                    nationality: null,
+                    dateOfBirth: null,
+                    dateOfDeath: null,
+                    placeOfBirth: null,
+                    placeOfDeath: null,
+                    instrument: null,
+                    psuedonym: null,
+                    work: null,
+                    release: null,
+                    tag: null
+                };
                 let aboutArtist = obj.table[i].aboutartist;
                 newObj.name = aboutArtist.name;
-                newObj.nationality = null;
-
-                newObj.dateOfBirth = null;
-                newObj.dateOfDeath = null;
-                newObj.placeOfBirth = null;
-                newObj.placeOfDeath = null;
+                newObj.source_link = "https://musicbrainz.org/artist/" + obj.table[i].artistId;
 
                 if (aboutArtist.hasOwnProperty("life-span")) {
                     if (aboutArtist["life-span"].hasOwnProperty("begin") && aboutArtist["life-span"].begin != null) {
@@ -43,13 +47,6 @@ function convertToInformation(content) {
                 if (aboutArtist.hasOwnProperty("end_area") && aboutArtist["end_area"] != null) {
                     newObj.placeOfDeath = aboutArtist["end_area"].name;
                 }
-
-                newObj.instrument = null;
-                newObj.psuedonym = null;
-                newObj.work = null;
-                newObj.release = null;
-                newObj.tag = null;
-                newObj.source_link = "https://musicbrainz.org/artist/" + obj.table[i].artistId;
 
                 musicians.push(newObj);
             }
