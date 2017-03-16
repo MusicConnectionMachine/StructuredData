@@ -37,9 +37,6 @@ function fname() {
             console.log(err.message);
             return;
         }
-        //console.log(JSON.stringify(res.status));
-        //console.log(JSON.stringify(res.headers));
-        //console.log(res.body);
         var cheerio = require('cheerio'),
             $ = cheerio.load(res.body);
 
@@ -59,20 +56,17 @@ function fname() {
         }
 
         $('td .name').each(function() {
-            //console.log($(this).text());   // music name
             var temp = ($(this).text()).replace(/[\n\r]+/g, '');
             temp = temp.replace(/\s{2,10}/g, '');
             recording.push(temp);
             source_link.push(url);
         });
         $('td .author').each(function() {
-            //	 console.log($(this).text()); //musician
             var temp = ($(this).text()).replace(/[\n\r]+/g, '');
             temp = temp.replace(/\s{2,10}/g, '');
             artist.push($(this).text());
         });
         $('td .itemPublisher').each(function() {
-            //console.log($(this).text()); //publisher
             var temp = ($(this).text()).replace(/[\n\r]+/g, '');
             temp = temp.replace(/\s{2,10}/g, '');
             publisher.push($(this).text());
