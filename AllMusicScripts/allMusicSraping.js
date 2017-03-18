@@ -1,3 +1,4 @@
+'use strict';
 const fs = require('fs');
 const request = require('request');
 const cheerio = require('cheerio');
@@ -24,13 +25,13 @@ function getPlace(placeInString) {
     });
     //values[0] = December 16 ,values[1] = 1770 in Bonn , values[2] = Germany
     if (values[1]) {
-        var place = [];
+        var  place = [];
         strSplit(values[1].trim(), /\s+/).map(function(element) {
             place.push(element);
         });
         if (place[2]) {
             if (values[2]) {
-                reqPlace = place[2] + " " + values[2];
+                reqPlace = place[2]+" "+values[2];
             } else {
                 reqPlace = place[2];
             }
@@ -39,14 +40,14 @@ function getPlace(placeInString) {
     return reqPlace;
 }
 
-function extractYear(value) {
-    if (value) {
-        var year = [];
-        strSplit(value.trim(), /\s+/).map(function(element) {
-            year.push(element);
-        });
-    }
-    return year[0];
+function extractYear(value){
+  var year = [];
+  if (value) {
+      strSplit(value.trim(), /\s+/).map(function(element) {
+          year.push(element);
+      });
+  }
+  return year[0];
 }
 
 //dateInString-For Eg:December 16, 1770 in Bonn, Germany
@@ -57,7 +58,7 @@ function getDate(dateInString) {
     var dataOfBirth = dateInString.split(",").map(function(val) {
         values.push(val);
     });
-    month = []
+    var month = []
     //Eg:values[0] = December 16
     if (values[0]) {
         var dateOfBirth;
@@ -67,16 +68,16 @@ function getDate(dateInString) {
         //Eg:month[0] = December
         var monthNum = getMonth(month[0]);
         //Eg:if values[1] = 1770 in Bonn
-        if (values[1]) {
-            year = extractYear(values[1]);
+        if(values[1]){
+            var year = extractYear(values[1]);
             date.push(month[1]);
             date.push(monthNum);
             date.push(year);
-        } else {
-            date = null; //all parts of the date or nothing
-        }
-    } else {
-        date = null; //all parts of the date or nothing
+          }else{
+            date = null;//all parts of the date or nothing
+          }
+    }else {
+      date = null ;//all parts of the date or nothing
     }
     //Eg:date[0]=16 , date[1]=12 , date[3] = 1770
     return date;
@@ -145,16 +146,16 @@ function getResults(queryURL, callback) {
                     dob = getDate(birth);
                     //check if the date of birth of composer falls in the classical music period
                     //range maps to the date of birth of 17th & 18th cent classical composers in DBPedia
-                    if (dob != null) {
-                        if (parseInt(dob[2]) < parseInt(1820) && parseInt(dob[2]) > parseInt(1600)) {
-                            birthDate = dob[0] + "-" + dob[1] + "-" + dob[2];
-                            isClassicalComposer = true;
-                        } else {
-                            isClassicalComposer = false;
-                            callback(name);
-                            return;
-                        }
+                    if(dob != null){
+                      if (parseInt(dob[2]) < parseInt(1820) && parseInt(dob[2]) > parseInt(1600)) {
+                        birthDate = dob[0] + "-" + dob[1] + "-" + dob[2];
+                        isClassicalComposer = true;
+                      } else {
+                        isClassicalComposer = false;
+                        callback(name);
+                        return;
                     }
+                  }
                 });
 
                 if (isClassicalComposer) {
@@ -171,15 +172,15 @@ function getResults(queryURL, callback) {
                     var deathDate = " ";
                     $('div.death>div').each(function(i, element) {
                         var death = $(this).text().trim();
-                        if (death) {
-                            var dod = [];
-                            dod = getDate(death);
-                            deathDate = dod[0] + "-" + dod[1] + "-" + dod[2];
-                            deathPlace = getPlace(death);
-                        } else {
-                            deathPlace = " ";
-                            deathDate = " ";
-                        }
+                        if(death){
+                          var dod = [];
+                          dod = getDate(death);
+                          deathDate = dod[0]+"-"+dod[1]+"-"+dod[2];
+                          deathPlace = getPlace(death);
+                       }else{
+                         deathPlace = " ";
+                         deathDate  =  " ";
+                       }
                     });
 
                     var pseudonym = [];
@@ -193,9 +194,9 @@ function getResults(queryURL, callback) {
                         var workTitle = replaceURLAndUnderscore($(this).attr('href'));
                         title.push(workTitle);
                     });
-                    var tags = null; //no instruments are found in this source
+                    var tags = null;//no instruments are found in this source
                     var instrument = null; //no instruments are found in this source
-                    var releases = null; //no instruments are found in this source
+                    var releases = null;//no instruments are found in this source
 
                     newObj.push({
                         name: name,
@@ -220,7 +221,7 @@ function getResults(queryURL, callback) {
     return callback(name);
 }
 
-url = 'http://www.allmusic.com/genre/classical-ma0000002521/artists';
+var url = 'http://www.allmusic.com/genre/classical-ma0000002521/artists';
 request(url, function(error, response, html) {
 
     if (error) {
