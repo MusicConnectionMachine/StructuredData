@@ -2,7 +2,7 @@ const fs = require('fs');
 const request = require('request');
 const cheerio = require('cheerio');
 const sleep = require('system-sleep');
-const strSplit = rdateTimeequire('strsplit');
+const strSplit = require('strsplit');
 var jsesc = require('jsesc');
 var newObj = [];
 
@@ -15,65 +15,75 @@ function replaceURLAndUnderscore(str) {
     return replaceAll(str, "_", " ")
 }
 //Extracted information  is in the form
-//Eg: December 16, 1770 in Bonn, Germany so we extract tokens from text.
-function getPlace(birthPlaceInString, callback) {
-    var birthPlace;
+//Eg: December 16, 1770 in Bonn, Germany so we extract Bonn,Germany from text.
+function getPlace(placeInString) {
+    var reqPlace;
     var values = []
-    var dataOfBirth = birthPlaceInString.split(",").map(function(val) {
+    var dataOfBirth = placeInString.split(",").map(function(val) {
         values.push(val);
     });
+    //values[0] = December 16 ,values[1] = 1770 in Bonn , values[2] = Germany
     if (values[1]) {
-        var year = [];
+        var place = [];
         strSplit(values[1].trim(), /\s+/).map(function(element) {
-            year.push(element);
+            place.push(element);
         });
-        if (year[2]) {
-            if (year[3]) {
-                birthPlace = year[2] + year[3];
+        if (place[2]) {
+            if (values[2]) {
+                reqPlace = place[2] + " " + values[2];
             } else {
-                birthPlace = year[2];
+                reqPlace = place[2];
             }
         }
     }
-    return callback(birthPlace);
+    return reqPlace;
 }
 
-function getDate(dateInString, callback) {
+function extractYear(value) {
+    if (value) {
+        var year = [];
+        strSplit(value.trim(), /\s+/).map(function(element) {
+            year.push(element);
+        });
+    }
+    return year[0];
+}
+
+//dateInString-For Eg:December 16, 1770 in Bonn, Germany
+function getDate(dateInString) {
     var date = [];
     var values = [];
+    //split by ','
     var dataOfBirth = dateInString.split(",").map(function(val) {
         values.push(val);
     });
     month = []
+    //Eg:values[0] = December 16
     if (values[0]) {
         var dateOfBirth;
         strSplit(values[0].trim(), /\s+/).map(function(ele) {
             month.push(ele);
         });
-        getMonth(month[0], function(monthNumber) {
-            var dayNum;
-            monName = monthNumber;
-            if (monName) {
-                dateOfBirth = month[1] + "-" + monName;
-                date.push(month[1]);
-                date.push(monName);
-            } else {}
-
-            if (values[1]) {
-                var year = [];
-                strSplit(values[1].trim(), /\s+/).map(function(element) {
-                    year.push(element);
-                });
-                date.push(year[0]);
-            }
-        });
+        //Eg:month[0] = December
+        var monthNum = getMonth(month[0]);
+        //Eg:if values[1] = 1770 in Bonn
+        if (values[1]) {
+            year = extractYear(values[1]);
+            date.push(month[1]);
+            date.push(monthNum);
+            date.push(year);
+        } else {
+            date = null; //all parts of the date or nothing
+        }
+    } else {
+        date = null; //all parts of the date or nothing
     }
+    //Eg:date[0]=16 , date[1]=12 , date[3] = 1770
     return date;
 }
 
-function getMonth(monthName, callback) {
+function getMonth(monthName) {
     var monthNumber;
-    //console.log(monthName);
     switch (monthName) {
         case 'January':
             monthNumber = '01';
@@ -114,35 +124,36 @@ function getMonth(monthName, callback) {
         default:
             monthNumber = '0'
     }
-    return callback(monthNumber);
+    return monthNumber;
 }
 
 function getResults(queryURL, callback) {
     var name = 'done';
     request(jsesc(queryURL), function(error, response, html) {
-        console.log("queryUrl", queryURL);
-        var birthDate;
+        var birthDate = "";
         if (error) {
             console.log("Error: " + error);
         }
         if (html) {
             var $ = cheerio.load(html);
-            console.log("url", queryURL);
             if (html) {
                 var isClassicalComposer = false;
                 //frist check if the person is a classical composer
                 $('div.birth>div').each(function(i, element) {
                     var birth = $(this).text().trim();
-                    console.log("birth", birth);
                     var dob = [];
                     dob = getDate(birth);
-                    if (parseInt(dob[2]) < parseInt(1820) && parseInt(dob[2]) > parseInt(1600)) {
-                        birthDate = dob[0] + "-" + dob[1] + "-" + dob[2];
-                        isClassicalComposer = true;
-                    } else {
-                        isClassicalComposer = false;
-                        callback(name);
-                        return;
+                    //check if the date of birth of composer falls in the classical music period
+                    //range maps to the date of birth of 17th & 18th cent classical composers in DBPedia
+                    if (dob != null) {
+                        if (parseInt(dob[2]) < parseInt(1820) && parseInt(dob[2]) > parseInt(1600)) {
+                            birthDate = dob[0] + "-" + dob[1] + "-" + dob[2];
+                            isClassicalComposer = true;
+                        } else {
+                            isClassicalComposer = false;
+                            callback(name);
+                            return;
+                        }
                     }
                 });
 
@@ -152,40 +163,23 @@ function getResults(queryURL, callback) {
                         name = $(this).text().trim();
                     });
                     var nationality = ""; //this information is not present in the source
-                    var birthPlace;
+                    var birthPlace = " ";
                     var birth = $(this).text().trim();
-                    getPlace(birth, function(err, birthPlace) {
+                    birthPlace = getPlace(birth);
 
-                        if (err) {
-                            birthPlace = birthPlace;
-                        } else {
-                            birthPlace = "";
-                        }
-                    });
-
-                    var deathPlace;
-                    var deathDate;
+                    var deathPlace = " ";
+                    var deathDate = " ";
                     $('div.death>div').each(function(i, element) {
                         var death = $(this).text().trim();
-                        var dod = [];
-                        dod = getDate(death);
-                        if (parseInt(dod[2]) < parseInt(1820) && parseInt(dod[2]) > parseInt(1600)) {
-                            birthDate = dod[0] + "-" + dod[1] + "-" + dod[2];
-                            isClassicalComposer = true;
+                        if (death) {
+                            var dod = [];
+                            dod = getDate(death);
+                            deathDate = dod[0] + "-" + dod[1] + "-" + dod[2];
+                            deathPlace = getPlace(death);
                         } else {
-                            isClassicalComposer = false;
-                            callback(name);
-                            return;
+                            deathPlace = " ";
+                            deathDate = " ";
                         }
-
-                        getPlace(death, function(err, deathPlace) {
-                            if (err) {
-                                deathPlace = "";
-                            } else {
-                                deathPlacedeathPlace = deathPlace;
-
-                            }
-                        });
                     });
 
                     var pseudonym = [];
@@ -199,10 +193,10 @@ function getResults(queryURL, callback) {
                         var workTitle = replaceURLAndUnderscore($(this).attr('href'));
                         title.push(workTitle);
                     });
-                    var tags = [];
-                    //instrument
-                    var instrument = []; //no instruments are found in this source
-                    var releases = [];
+                    var tags = null; //no instruments are found in this source
+                    var instrument = null; //no instruments are found in this source
+                    var releases = null; //no instruments are found in this source
+
                     newObj.push({
                         name: name,
                         nationality: nationality,
