@@ -41,47 +41,12 @@ var work = [];
                 }
 
             }
-        
-        // SCRIPT THAT ADDS ARTISTS ID'S TO WORKS AND RELEASES
-        // ===================================================
-        //   var counter = obj[i].count;
+        }
 
-        //   if (counter > 0) {
-        //       for(j = 0; j < counter; j++) {   
-
-        //         if (obj[i].works[j] != null && obj[i].works[j].title != null) { 
-        //           console.log(obj[i].works[j].title);
-        //           var byArtists = [];
-
-                  
-        //           for (z = 0; z < ReadArtists.length; z++) {
-        //               if (obj[i].artistId == ReadArtists[z].artistId) {
-        //                   byArtists.push(ReadArtists[z].id); 
-        //               }
-        //           }
-
-                                    
-
-        //           var id = ""+i+""+j+"";
-        //           var newObj = {
-        //             id: id,
-        //             title: obj[i].works[j].title,
-        //             artistId: obj[i].artistId,
-        //             byartist: byArtists
-        //           };
-        //           works.push(newObj);
-        //         }
-        //       }   
-        //     }
-        //   }
-        
-            
-          }
-
-          json2 = JSON.stringify(ReadArtists); //convert it back to json
-            fs.writeFile('ArtistsAPI.json', json2, 'utf8', function writeFileCallback(err, data) {
-                process.exit();
-            }); // write it back
+        json2 = JSON.stringify(ReadArtists); //convert it back to json
+        fs.writeFile('ArtistsAPI.json', json2, 'utf8', function writeFileCallback(err, data) {
+            process.exit();
+        }); // write it back
           
           
         });
