@@ -1,4 +1,3 @@
-const http = require('http');
 var request = require("request");
 var fs = require('fs');
 

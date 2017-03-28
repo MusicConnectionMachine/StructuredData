@@ -216,7 +216,7 @@ function fetch3(value2) {
             work: work,
             release: release,
             tag: tag,
-            source_link: value2
+            source_link: value2,
             wikipedia_link: wiki_link,
             wikipedia_pageid: wiki_pageid
         });

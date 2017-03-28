@@ -167,6 +167,19 @@ function checkCat(linkNationality) {
 
                             });
                         }
+                        var wiki_link = "";
+                        if ($('a[rel="foaf:isPrimaryTopicOf"]').attr('href')) {
+                            wiki_link = $('a[rel="foaf:isPrimaryTopicOf"]').attr('href');
+                        }
+                        else if ($('a[rel="foaf:primaryTopic"]').attr('href')) {
+                            wiki_link = $('a[rel="foaf:primaryTopic"]').attr('href');
+
+                        }
+
+                        var wiki_pageid = "";
+                        if ($('span[property="dbo:wikiPageID"]').text()) {
+                            wiki_pageid = $('span[property="dbo:wikiPageID"]').text();
+                        }
 
                         if (nationality.length == 0)
                             nationality = null;
@@ -188,6 +201,10 @@ function checkCat(linkNationality) {
                             release = null;
                         if (tag.length == 0)
                             tag = null;
+                        if (wiki_link.length == 0)
+                            wiki_link = null;
+                        if (wiki_pageid.length == 0)
+                            wiki_pageid = null;
 
                         console.log("adding " + name);
                         musicians.push({
@@ -205,7 +222,9 @@ function checkCat(linkNationality) {
 
                             release: release,
                             tag: tag,
-                            source_link: linkMusician
+                            source_link: linkMusician,
+                            wikipedia_link: wiki_link,
+                            wikipedia_pageid: wiki_pageid
                         })
 
                     }
