@@ -261,7 +261,7 @@ function fetch4(linkMusicianAndNationality) {
             work: work,
             release: release,
             tag: tag,
-            source_link: linkMusicianAndNationality
+            source_link: linkMusicianAndNationality,
             wikipedia_link: wiki_link,
             wikipedia_pageid: wiki_pageid
         });
