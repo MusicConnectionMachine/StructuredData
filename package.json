@@ -3,9 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "scripts": {
-
-  },
+  "scripts": {},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/MusicConnectionMachine/StructuredData.git"
@@ -18,11 +16,17 @@
   "homepage": "https://github.com/MusicConnectionMachine/StructuredData#readme",
   "dependencies": {
     "cheerio": "0.22.0",
+    "child_process": "1.0.2",
+    "commander": "2.9.0",
     "fs": "0.0.1-security",
     "jsesc": "2.4.0",
     "math-ceil": "1.0.0",
     "numeral": "2.0.6",
+    "path": "^0.12.7",
+    "pg": "^6.1.5",
+    "pg-hstore": "^2.3.2",
     "request": "2.81.0",
+    "sequelize": "^3.30.4",
     "strsplit": "1.0.0",
     "system-sleep": "1.3.0"
   }
