@@ -45,7 +45,7 @@ function iterateSubCat($, callback) {
     console.log("----Write to output file!----");
     jsonEntry = JSON.stringify(musicians);
     fs.writeFileSync(outputFile, jsonEntry, 'utf8');
-    process.send("done scraping dbpedia_Classical_musicians_by_instruments");
+    process.send("done scraping dbpedia_Classical_musicians_by_nationality");
     process.exit();
 
 }
