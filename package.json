@@ -2,7 +2,7 @@
   "name": "structured_data",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "cli.js",
   "scripts": {},
   "repository": {
     "type": "git",

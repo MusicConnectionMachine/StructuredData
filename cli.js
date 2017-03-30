@@ -91,6 +91,7 @@ if (commander.script == "test") {
         "./testscripts/dbpedia_musicians_nationality.js"
     );
 }
+
 var arrayLength = scriptsArray.length;
 var cpCounter = 0;
 for (var i = 0; i < arrayLength; i++) {
@@ -106,15 +107,13 @@ for (var i = 0; i < arrayLength; i++) {
         if (cpCounter == arrayLength) {
             populateDB();
         }
-    })
-    ;
+    });
 
-}
-;
+};
 
 function populateDB() {
-    console.log("Starting to populate db");
-    require(path.join(__dirname, "index.js")).connect(function (context) {
+    console.log("Starting to populate db now");
+    require(path.join(__dirname, "\\api/index.js")).connect(function (context) {
         const api = require("./loadModules.js")(context, function () {
             context.sequelize.sync({force: true}).then(function () {
 
@@ -134,7 +133,7 @@ function populateDB() {
                         })
                     });
                 });
-
+/*
                 // bulk create all works
                 const works = context.component('models').module('works');
                 const workspath = path.join(__dirname, "scrapedoutput", "works")
@@ -168,7 +167,7 @@ function populateDB() {
                         })
                     });
                 });
-
+*/
 
             }).catch(function (error) {
                 console.error("There was an error while syncronizing the tables between the application and the database.");
