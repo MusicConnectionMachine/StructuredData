@@ -5,7 +5,7 @@ var fs = require('fs');
 var jsesc = require('jsesc');
 const url = "http://dbpedia.org/page/Category:Classical_musicians_by_nationality";
 
-const outputFile = "dbpedia_Classical_musicians_by_nationality.json";
+const outputFile = "./scrapedoutput/artists/dbpedia_Classical_musicians_by_nationality.json";
 
 var musicians = [];
 //helper functions to replace al occurrences of a string
@@ -45,6 +45,7 @@ function iterateSubCat($, callback) {
     console.log("----Write to output file!----");
     jsonEntry = JSON.stringify(musicians);
     fs.writeFileSync(outputFile, jsonEntry, 'utf8');
+    process.send("done scraping dbpedia_Classical_musicians_by_instruments");
     process.exit();
 
 }

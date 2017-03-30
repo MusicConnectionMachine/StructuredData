@@ -47,7 +47,8 @@ function fetch1(link1) {
         });
 
         json2 = JSON.stringify(musicians); //convert it back to json
-        fs.writeFileSync('dbpedia_Classical_musicians_by_instruments.json', json2, 'utf8'); // write it back
+        fs.writeFileSync('./scrapedoutput/artists/dbpedia_Classical_musicians_by_instruments.json', json2, 'utf8'); // write it back
+        process.send("done scraping dbpedia_Classical_musicians_by_instruments");
         process.exit();
     });
 }
