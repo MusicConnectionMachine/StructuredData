@@ -114,7 +114,7 @@ for (var i = 0; i < arrayLength; i++) {
 
 function populateDB() {
     console.log("Starting to populate db");
-    require(path.join(__dirname, "index.js")).connect(function (context) {
+    require(path.join(__dirname, "\\api\\index.js")).connect(function (context) {
         const api = require("./loadModules.js")(context, function () {
             context.sequelize.sync({force: true}).then(function () {
 
