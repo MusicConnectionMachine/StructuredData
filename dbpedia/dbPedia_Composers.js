@@ -206,7 +206,8 @@ function get_URL(value, callback) {
                 getResults(value, function(name) {});
                 sleep(1000);
             });
-            fs.writeFileSync('dbPedia_Composers.json', JSON.stringify(newObj), 'utf-8')
+            fs.writeFileSync('../scraped_output/composers/dbPedia_Composers.json', JSON.stringify(newObj), 'utf-8')
+            process.send("done scraping");
             process.exit();
         }
     });
