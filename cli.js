@@ -42,6 +42,7 @@ const commander = require('commander');
 const cp = require('child_process');
 const path = require('path');
 const fs = require('fs');
+const parse = require('pg-connection-string').parse;
 //const path      = require('path');
 /*const parser    = require(path.resolve(__dirname,'parser'));
  const dataGridRenderer    = require(path.resolve(__dirname,'dataGridRenderer'));*/
@@ -51,8 +52,8 @@ commander
     .option('-p, --postgres ', 'Set the connection string to connect to the postgres db.')
     .parse(process.argv);
 
-const script = process.env.s ||commander.script;
-const postgresCS = process.env.p ||commander.postgres;
+const script = process.env.s || commander.script;
+const postgresCS = parse(process.env.p) || parse(commander.postgres);
 
 var scriptsArray = [];
 if (script == "dbpedia") {
@@ -64,12 +65,12 @@ if (script == "dbpedia") {
         "./dbpedia/dbPedia_Composers.js"
     );
 }
-if (script== "worldcat") {
+if (script == "worldcat") {
     console.log("Adding worldcat scripts");
     scriptsArray.push("./worldcat/worldcat.js"
     );
 }
-if (script== "musicbrainz") {
+if (script == "musicbrainz") {
     console.log("Adding musicbrainz scripts");
     scriptsArray.push("./musicbrainz/scrapeArtists/server.js",
         "./musicbrainz/scrapeRecordings/server.js",
@@ -81,12 +82,12 @@ if (script== "musicbrainz") {
         "./musicbrainz/PutJSONTogether/app.js"
     );
 }
-if (script== "allmusic") {
+if (script == "allmusic") {
     console.log("Adding almusic scripts");
     scriptsArray.push("./allmusic/allMusicScript.js"
     );
 }
-if (script== "test") {
+if (script == "test") {
     console.log("Adding test scripts");
     scriptsArray.push("./testscripts/test.js",
         "./testscripts/test2.js",
@@ -117,7 +118,7 @@ for (var i = 0; i < arrayLength; i++) {
 
 function populateDB() {
     console.log("Starting to populate db");
-    require(path.join(__dirname, "index.js")).connect(postgresCS,function (context) {
+    require(path.join(__dirname, "index.js")).connect(postgresCS, function (context) {
         const api = require("./loadModules.js")(context, function () {
             context.sequelize.sync({force: true}).then(function () {
 
