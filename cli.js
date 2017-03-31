@@ -42,18 +42,18 @@ const commander = require('commander');
 const cp = require('child_process');
 const path = require('path');
 const fs = require('fs');
-const parse = require('pg-connection-string').parse;
 //const path      = require('path');
 /*const parser    = require(path.resolve(__dirname,'parser'));
  const dataGridRenderer    = require(path.resolve(__dirname,'dataGridRenderer'));*/
 
 commander
     .option('-s, --script [script]', 'Define the scripts that should be executed', /^(dbpedia|worldcat|musicbrainz|allmusic|test)$/i)
-    .option('-p, --postgres ', 'Set the connection string to connect to the postgres db.')
+    .option('-p, --postgres [postgres] ', 'Set the connection string to connect to the postgres db.')
     .parse(process.argv);
 
-const script = process.env.s || commander.script;
-const postgresCS = parse(process.env.p) || parse(commander.postgres);
+const script = commander.script || process.env.s;
+
+const postgresCS = commander.postgres || process.env.p;
 
 var scriptsArray = [];
 if (script == "dbpedia") {
@@ -118,7 +118,7 @@ for (var i = 0; i < arrayLength; i++) {
 
 function populateDB() {
     console.log("Starting to populate db");
-    require(path.join(__dirname, "index.js")).connect(postgresCS, function (context) {
+    require(path.join(__dirname, "api", "index.js")).connect(postgresCS, function (context) {
         const api = require("./loadModules.js")(context, function () {
             context.sequelize.sync({force: true}).then(function () {
 
