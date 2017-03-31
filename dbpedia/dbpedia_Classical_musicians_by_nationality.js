@@ -12,36 +12,36 @@ var musicians = [];
 function replaceAll(str, find, replace) {
     return str.replace(new RegExp(find, 'g'), replace);
 }
+
 function replaceURLAndUnderscore(str) {
     str = str.replace("http://dbpedia.org/resource/", "")
     return replaceAll(str, "_", " ")
 }
 //Delete outputfile if it already exists
 fs.unlink(outputFile, scrapeMainCat);
+
 function scrapeMainCat() {
     //request http://dbpedia.org/page/Category:Classical_musicians_by_nationality
-    request(url, function (error, response, body) {
-            if (error) {
-                console.log("Error: " + error);
-            }
-            var $ = cheerio.load(body);
-            // iterate through all of the nation_classical_composers, i.e. german_classical_composers, american_classical_composers, ...
-            iterateSubCat($);
+    request(url, function(error, response, body) {
+        if (error) {
+            console.log("Error: " + error);
         }
-    )
+        var $ = cheerio.load(body);
+        // iterate through all of the nation_classical_composers, i.e. german_classical_composers, american_classical_composers, ...
+        iterateSubCat($);
+    })
 }
 
 function iterateSubCat($, callback) {
     var catArray = [];
-    $('a[rev="skos:broader"]').each(function () {
+    $('a[rev="skos:broader"]').each(function() {
         catArray.push($(this).attr('href'));
     });
 
-    catArray.forEach(function (link) {
-            checkCat(link);
-            sleep(1000);
-        }
-    );
+    catArray.forEach(function(link) {
+        checkCat(link);
+        sleep(1000);
+    });
     console.log("----Write to output file!----");
     jsonEntry = JSON.stringify(musicians);
     fs.writeFileSync(outputFile, jsonEntry, 'utf8');
@@ -53,7 +53,7 @@ function iterateSubCat($, callback) {
 function checkCat(linkNationality) {
     console.log("checking nationality :" + linkNationality);
     // go to the link of nation_classical_composers
-    request(linkNationality, function (error, response, body) {
+    request(linkNationality, function(error, response, body) {
         if (error) {
             console.log("Error: " + error);
         }
@@ -61,13 +61,13 @@ function checkCat(linkNationality) {
         if (body) {
             var $ = cheerio.load(body);
             //iterate through all of the musicians, i.e. Mozart, Brahms, ...
-            $('a[rev="dct:subject"]').each(function (index) {
+            $('a[rev="dct:subject"]').each(function(index) {
 
                 sleep(1000);
                 var linkMusician = $(this).attr('href');
                 console.log("checking musician :" + linkMusician);
                 // go to the link of the musician
-                request(jsesc(linkMusician), function (error, response, body) {
+                request(jsesc(linkMusician), function(error, response, body) {
                     if (error) {
                         console.log("Error: " + error);
                     }
@@ -78,21 +78,30 @@ function checkCat(linkNationality) {
 
                         var nationality = linkNationality.replace("http://dbpedia.org/page/Category:", "").replace("http://dbpedia.org/resource/Category:", "").replace("_classical_musicians", "");
 
-                        var dateOfBirth = $('span[property="dbo:birthDate"]').text().trim();
-                        var dateOfDeath = $('span[property="dbo:deathDate"]').text().trim();
+                        //to check if only one date is considered
+                        //Eg:http://dbpedia.org/page/David_Breeden has two date of death entries
+                        var dateOfBirth = null;
+                        if ($('span[property="dbo:birthDate"]').text().trim()) {
+                            $('span[property="dbo:birthDate"]').each(function(index) {
+                                dateOfBirth = $('span[property="dbo:birthDate"]').text().trim();
+                            });
+                        }
+                        var dateOfDeath = null;
+                        if ($('span[property="dbo:deathDate"]').text().trim()) {
+                            $('span[property="dbo:deathDate"]').each(function(index) {
+                                dateOfDeath = $('span[property="dbo:deathDate"]').text().trim();
+                            });
+                        }
 
                         //birthplace
                         var placeOfBirth = "";
                         if ($('span[property="dbp:birthPlace"]').text().trim() && $('span[property="dbp:birthPlace"]').text().trim() != "") {
                             placeOfBirth = $('span[property="dbp:birthPlace"]').text().trim();
-                        }
-                        else if ($('span[property="dbp:placeOfBirth"]').text().trim() && $('span[property="dbp:placeOfBirth"]').text().trim() != "") {
+                        } else if ($('span[property="dbp:placeOfBirth"]').text().trim() && $('span[property="dbp:placeOfBirth"]').text().trim() != "") {
                             placeOfBirth = $('span[property="dbp:placeOfBirth"]').text().trim();
-                        }
-                        else if ($('a[rel="dbo:placeOfBirth"]').attr('href') && $('a[rel="dbo:placeOfBirth"]').attr('href') != "") {
+                        } else if ($('a[rel="dbo:placeOfBirth"]').attr('href') && $('a[rel="dbo:placeOfBirth"]').attr('href') != "") {
                             placeOfBirth = replaceURLAndUnderscore($('a[rel="dbo:placeOfBirth"]').attr('href'));
-                        }
-                        else if ($('a[rel="dbo:birthPlace"]').attr('href') && $('a[rel="dbo:birthPlace"]').attr('href') != "") {
+                        } else if ($('a[rel="dbo:birthPlace"]').attr('href') && $('a[rel="dbo:birthPlace"]').attr('href') != "") {
                             placeOfBirth = replaceURLAndUnderscore($('a[rel="dbo:birthPlace"]').attr('href'));
                         }
 
@@ -100,26 +109,22 @@ function checkCat(linkNationality) {
                         var placeOfDeath = "";
                         if ($('span[property="dbp:placeOfDeath"]').text().trim() && $('span[property="dbp:placeOfDeath"]').text().trim() != "") {
                             placeOfDeath = $('span[property="dbp:placeOfDeath"]').text().trim();
-                        }
-                        else if ($('span[property="dbp:deathPlace"]').text().trim() && $('span[property="dbp:deathPlace"]').text().trim() != "") {
+                        } else if ($('span[property="dbp:deathPlace"]').text().trim() && $('span[property="dbp:deathPlace"]').text().trim() != "") {
                             placeOfDeath = $('span[property="dbp:deathPlace"]').text().trim();
-                        }
-                        else if ($('a[rel="dbo:placeOfDeath"]').attr('href') && $('a[rel="dbo:placeOfDeath"]').attr('href') != "") {
+                        } else if ($('a[rel="dbo:placeOfDeath"]').attr('href') && $('a[rel="dbo:placeOfDeath"]').attr('href') != "") {
                             placeOfDeath = replaceURLAndUnderscore($('a[rel="dbo:placeOfDeath"]').attr('href'));
-                        }
-                        else if ($('a[rel="dbo:deathPlace"]').attr('href') && $('a[rel="dbo:deathPlace"]').attr('href') != "") {
+                        } else if ($('a[rel="dbo:deathPlace"]').attr('href') && $('a[rel="dbo:deathPlace"]').attr('href') != "") {
                             placeOfDeath = replaceURLAndUnderscore($('a[rel="dbo:deathPlace"]').attr('href'));
                         }
 
                         //instrument
                         var instrument = [];
                         if ($('span[property="dbp:instrument"]').text().trim() && $('span[property="dbp:instrument"]').text().trim() != "") {
-                            $('span[property="dbp:instrument"]').each(function (index) {
+                            $('span[property="dbp:instrument"]').each(function(index) {
                                 instrument.push($(this).text().trim());
                             });
-                        }
-                        else if ($('a[rel="dbo:instrument"]').attr('href') && $('a[rel="dbo:instrument"]').attr('href') != "") {
-                            $('a[rel="dbo:instrument"]').each(function (index) {
+                        } else if ($('a[rel="dbo:instrument"]').attr('href') && $('a[rel="dbo:instrument"]').attr('href') != "") {
+                            $('a[rel="dbo:instrument"]').each(function(index) {
                                 var inst = replaceURLAndUnderscore($(this).attr('href'));
                                 instrument.push(inst);
                             });
@@ -127,23 +132,22 @@ function checkCat(linkNationality) {
 
 
                         //pseudonym
-                        var psuedonym = [];
+                        var pseudonym = [];
                         if ($('span[property="dbp:psuedonym"]').text() && $('span[property="dbp:psuedonym"]').text() != "") {
-                            $('span[property="dbp:psuedonym"]').each(function (index) {
+                            $('span[property="dbp:psuedonym"]').each(function(index) {
                                 var psuedo = replaceURLAndUnderscore($(this).text());
-                                psuedonym.push(psuedo);
+                                pseudonym.push(psuedo);
                             });
                         }
 
                         // work
                         var work = [];
                         if ($('span[property="dbp:writer"]').text().trim() && $('span[property="dbp:writer"]').text().trim() != "") {
-                            $('span[property="dbp:writer"]').each(function (index) {
+                            $('span[property="dbp:writer"]').each(function(index) {
                                 instrument.push($(this).text().trim());
                             });
-                        }
-                        else if ($('a[rel="dbo:writer"]').attr('href') && $('a[rel="dbo:writer"]').attr('href') != "") {
-                            $('a[rel="dbo:writer"]').each(function (index) {
+                        } else if ($('a[rel="dbo:writer"]').attr('href') && $('a[rel="dbo:writer"]').attr('href') != "") {
+                            $('a[rel="dbo:writer"]').each(function(index) {
                                 var inst = replaceURLAndUnderscore($(this).attr('href'));
                                 instrument.push(inst);
                             });
@@ -152,18 +156,18 @@ function checkCat(linkNationality) {
                         //release
                         var release = [];
                         if ($('a[rel="dbp:artist"]').attr('href') && $('a[rel="dbp:artist"]').attr('href') != "") {
-                            $('a[rel="dbp:artist"]').each(function (index) {
+                            $('a[rel="dbp:artist"]').each(function(index) {
                                 var rel = replaceURLAndUnderscore($(this).attr('href'));
                                 release.push(rel);
                             });
                         }
 
-                        var tag = [];
+                        var tags = [];
                         if ($('a[rel="dct:subject"]').attr('href') && $('a[rel="dct:subject"]').attr('href') != "") {
-                            $('a[rel="dct:subject"]').each(function (index) {
+                            $('a[rel="dct:subject"]').each(function(index) {
                                 if ($(this).attr('href').includes("classic")) {
                                     var t = replaceURLAndUnderscore($(this).attr('href').replace("Category:", ""));
-                                    tag.push(t);
+                                    tags.push(t);
                                 }
 
                             });
@@ -171,8 +175,7 @@ function checkCat(linkNationality) {
                         var wiki_link = "";
                         if ($('a[rel="foaf:isPrimaryTopicOf"]').attr('href')) {
                             wiki_link = $('a[rel="foaf:isPrimaryTopicOf"]').attr('href');
-                        }
-                        else if ($('a[rel="foaf:primaryTopic"]').attr('href')) {
+                        } else if ($('a[rel="foaf:primaryTopic"]').attr('href')) {
                             wiki_link = $('a[rel="foaf:primaryTopic"]').attr('href');
 
                         }
@@ -184,24 +187,10 @@ function checkCat(linkNationality) {
 
                         if (nationality.length == 0)
                             nationality = null;
-                        if (dateOfBirth.length == 0)
-                            dateOfBirth = null;
-                        if (dateOfDeath.length == 0)
-                            dateOfDeath = null;
                         if (placeOfBirth.length == 0)
                             placeOfBirth = null;
                         if (placeOfDeath.length == 0)
                             placeOfDeath = null;
-                        if (instrument.length == 0)
-                            instrument = null;
-                        if (psuedonym.length == 0)
-                            psuedonym = null;
-                        if (work.length == 0)
-                            work = null;
-                        if (release.length == 0)
-                            release = null;
-                        if (tag.length == 0)
-                            tag = null;
                         if (wiki_link.length == 0)
                             wiki_link = null;
                         if (wiki_pageid.length == 0)
@@ -210,22 +199,20 @@ function checkCat(linkNationality) {
                         console.log("adding " + name);
                         musicians.push({
                             name: name,
+                            artist_type: 'musician',
                             nationality: nationality,
                             dateOfBirth: dateOfBirth,
                             dateOfDeath: dateOfDeath,
-
                             placeOfBirth: placeOfBirth,
-
                             placeOfDeath: placeOfDeath,
                             instrument: instrument,
-                            psuedonym: psuedonym,
+                            pseudonym: pseudonym,
                             work: work,
-
                             release: release,
-                            tag: tag,
+                            tags: tags,
                             source_link: linkMusician,
-                            wikipedia_link: wiki_link,
-                            wikipedia_pageid: wiki_pageid
+                            wiki_link: wiki_link,
+                            wiki_pageid: wiki_pageid
                         })
 
                     }
