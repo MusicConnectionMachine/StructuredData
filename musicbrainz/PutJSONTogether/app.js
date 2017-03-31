@@ -1,13 +1,15 @@
 var fs = require("fs");
 console.log("\n *START* \n");
-var content = "artists.json";
+var content = "./scrapedoutput/BrainzArtists.json";
+
+convertToInformation(content);
 
 function convertToInformation(content) {
     fs.readFile(content, 'utf8', function readFileCallback(err, data) {
         let musicians = [];
         if (err) {
             console.log(err);
-            return;
+            return 0;
         }
 
         obj = JSON.parse(data); //now it an object
@@ -36,7 +38,7 @@ function convertToInformation(content) {
                         newObj.dateOfBirth = aboutArtist["life-span"].begin;
                     }
                     if (aboutArtist["life-span"].hasOwnProperty("end") && aboutArtist["life-span"].end != null) {
-                        newObj.dateOfBirth = aboutArtist["life-span"].end;
+                        newObj.dateOfDeath = aboutArtist["life-span"].end;
                     }
                 }
 
@@ -51,7 +53,13 @@ function convertToInformation(content) {
                 musicians.push(newObj);
             }
         }
-        return musicians;
+        
+        json2 = JSON.stringify(musicians); //convert it back to json
+        fs.writeFile('./scrapedoutput/BrainzArtistsSequelize.json', json2, 'utf8', function writeFileCallback(err, data) {
+            process.send("done");
+            process.exit();
+        }); // write it back
+
     });
 }
 
