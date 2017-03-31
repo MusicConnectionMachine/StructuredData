@@ -61,17 +61,17 @@ function fetch2(value2) {
         var nationality = $('span[property="dbo:nationality"]').text().trim();
         //to check if only one date is considered
         //Eg:http://dbpedia.org/page/David_Breeden has two date of death entries
-        var dateOfBirth=null;
-        if($('span[property="dbo:birthDate"]').text().trim()){
-         $('span[property="dbo:birthDate"]').each(function (index) {
-            dateOfBirth = $('span[property="dbo:birthDate"]').text().trim();
-         });
+        var dateOfBirth = null;
+        if ($('span[property="dbo:birthDate"]').text().trim()) {
+            $('span[property="dbo:birthDate"]').each(function(index) {
+                dateOfBirth = $('span[property="dbo:birthDate"]').text().trim();
+            });
         }
-		var dateOfDeath=null ;
-        if($('span[property="dbo:deathDate"]').text().trim()){
-			$('span[property="dbo:deathDate"]').each(function (index) {
-			   dateOfDeath = $('span[property="dbo:deathDate"]').text().trim();
-			});
+        var dateOfDeath = null;
+        if ($('span[property="dbo:deathDate"]').text().trim()) {
+            $('span[property="dbo:deathDate"]').each(function(index) {
+                dateOfDeath = $('span[property="dbo:deathDate"]').text().trim();
+            });
         }
         //birthplace
         var placeOfBirth;
@@ -178,25 +178,20 @@ function fetch2(value2) {
             wiki_pageid = $('span[property="dbo:wikiPageID"]').text();
         }
 
-		if (work.length == 0)
-            work = null;
-        if (release.length == 0)
-            release = null;
         if (nationality.length == 0)
             nationality = null;
         if (placeOfBirth.length == 0)
             placeOfBirth = null;
         if (placeOfDeath.length == 0)
             placeOfDeath = null;
-        if (instrument.length == 0)
-            instrument = null;
         if (wiki_link.length == 0)
             wiki_link = null;
         if (wiki_pageid.length == 0)
             wiki_pageid = null;
+            
         musicians.push({
             name: split_name[0].trim(),
-			artist_type: 'musician',
+            artist_type: 'musician',
             nationality: nationality,
             dateOfBirth: dateOfBirth,
             dateOfDeath: dateOfDeath,

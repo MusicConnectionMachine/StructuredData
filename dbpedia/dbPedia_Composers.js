@@ -37,19 +37,19 @@ function getResults(queryURL, callback) {
             }
             var nationality = $('span[property="dbo:nationality"]').text().trim();
             //to check if only one date is considered
-			//Eg:http://dbpedia.org/page/David_Breeden has two date of death entries
-			var dateOfBirth = null ;
-			if($('span[property="dbo:birthDate"]').text().trim()){
-				$('span[property="dbo:birthDate"]').each(function (index) {
-					dateOfBirth = $('span[property="dbo:birthDate"]').text().trim();
-				});
-			}
-			var dateOfDeath = null;
-			if($('span[property="dbo:deathDate"]').text().trim()){
-				$('span[property="dbo:deathDate"]').each(function (index) {
-					dateOfDeath = $('span[property="dbo:deathDate"]').text().trim();
-				});
-			}
+            //Eg:http://dbpedia.org/page/David_Breeden has two date of death entries
+            var dateOfBirth = null;
+            if ($('span[property="dbo:birthDate"]').text().trim()) {
+                $('span[property="dbo:birthDate"]').each(function(index) {
+                    dateOfBirth = $('span[property="dbo:birthDate"]').text().trim();
+                });
+            }
+            var dateOfDeath = null;
+            if ($('span[property="dbo:deathDate"]').text().trim()) {
+                $('span[property="dbo:deathDate"]').each(function(index) {
+                    dateOfDeath = $('span[property="dbo:deathDate"]').text().trim();
+                });
+            }
 
             //birthplace
             var placeOfBirth;
@@ -148,7 +148,7 @@ function getResults(queryURL, callback) {
                 });
             }
             // wiki link
-            var  wiki_link = "";
+            var wiki_link = "";
             if ($('a[rel="foaf:isPrimaryTopicOf"]').attr('href'))
                 wiki_link = $('a[rel="foaf:isPrimaryTopicOf"]').attr('href');
             else if ($('a[rel="foaf:primaryTopic"]').attr('href'))
@@ -160,25 +160,16 @@ function getResults(queryURL, callback) {
                 wiki_pageid = $('span[property="dbo:wikiPageID"]').text();
             }
 
-            if (array.length == 0)
-                array = null;
-            if (release.length == 0)
-                release = null;
             if (nationality.length == 0)
                 nationality = null;
-            if (placeOfBirth.length == 0)
-                placeOfBirth = null;
-            if (placeOfDeath.length == 0)
-                placeOfDeath = null;
-            if (instrument.length == 0)
-                instrument = null;
             if (wiki_link.length == 0)
                 wiki_link = null;
             if (wiki_pageid.length == 0)
                 wiki_pageid = null;
+                
             newObj.push({
                 name: name,
-				artist_type: 'composer',
+                artist_type: 'composer',
                 nationality: nationality,
                 dateOfBirth: dateOfBirth,
                 dateOfDeath: dateOfDeath,
