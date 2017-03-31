@@ -178,6 +178,10 @@ function fetch2(value2) {
             wiki_pageid = $('span[property="dbo:wikiPageID"]').text();
         }
 
+		if (work.length == 0)
+            work = null;
+        if (release.length == 0)
+            release = null;
         if (nationality.length == 0)
             nationality = null;
         if (placeOfBirth.length == 0)
