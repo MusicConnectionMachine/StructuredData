@@ -180,15 +180,11 @@ function fetch2(value2) {
 
         if (nationality.length == 0)
             nationality = null;
-        if (placeOfBirth.length == 0)
-            placeOfBirth = null;
-        if (placeOfDeath.length == 0)
-            placeOfDeath = null;
         if (wiki_link.length == 0)
             wiki_link = null;
         if (wiki_pageid.length == 0)
             wiki_pageid = null;
-            
+
         musicians.push({
             name: split_name[0].trim(),
             artist_type: 'musician',
