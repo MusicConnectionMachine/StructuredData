@@ -12,6 +12,7 @@ setInterval(function () {
     if (date == 1821) {
         json2 = JSON.stringify(obj); //convert it back to json
         fs.writeFile('./scrapedoutput/BrainzIDartists.json', json2, 'utf8', function writeFileCallback(err, data) {
+            process.send("done");
             process.exit();
         }); // write it back
     }
