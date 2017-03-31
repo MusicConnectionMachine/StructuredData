@@ -78,8 +78,20 @@ function checkCat(linkNationality) {
 
                         var nationality = linkNationality.replace("http://dbpedia.org/page/Category:", "").replace("http://dbpedia.org/resource/Category:", "").replace("_classical_musicians", "");
 
-                        var dateOfBirth = $('span[property="dbo:birthDate"]').text().trim();
-                        var dateOfDeath = $('span[property="dbo:deathDate"]').text().trim();
+                        //to check if only one date is considered
+						//Eg:http://dbpedia.org/page/David_Breeden has two date of death entries
+						var dateOfBirth = null ;
+						if($('span[property="dbo:birthDate"]').text().trim()){
+							$('span[property="dbo:birthDate"]').each(function (index) {
+								dateOfBirth = $('span[property="dbo:birthDate"]').text().trim();
+							});
+						}
+						var dateOfDeath = null ;
+						if($('span[property="dbo:deathDate"]').text().trim()){
+							$('span[property="dbo:deathDate"]').each(function (index) {
+							dateOfDeath = $('span[property="dbo:deathDate"]').text().trim();
+							});
+						}
 
                         //birthplace
                         var placeOfBirth = "";
@@ -127,11 +139,11 @@ function checkCat(linkNationality) {
 
 
                         //pseudonym
-                        var psuedonym = [];
+                        var pseudonym = [];
                         if ($('span[property="dbp:psuedonym"]').text() && $('span[property="dbp:psuedonym"]').text() != "") {
                             $('span[property="dbp:psuedonym"]').each(function (index) {
                                 var psuedo = replaceURLAndUnderscore($(this).text());
-                                psuedonym.push(psuedo);
+                                pseudonym.push(psuedo);
                             });
                         }
 
@@ -158,12 +170,12 @@ function checkCat(linkNationality) {
                             });
                         }
 
-                        var tag = [];
+                        var tags = [];
                         if ($('a[rel="dct:subject"]').attr('href') && $('a[rel="dct:subject"]').attr('href') != "") {
                             $('a[rel="dct:subject"]').each(function (index) {
                                 if ($(this).attr('href').includes("classic")) {
                                     var t = replaceURLAndUnderscore($(this).attr('href').replace("Category:", ""));
-                                    tag.push(t);
+                                    tags.push(t);
                                 }
 
                             });
@@ -184,24 +196,16 @@ function checkCat(linkNationality) {
 
                         if (nationality.length == 0)
                             nationality = null;
-                        if (dateOfBirth.length == 0)
-                            dateOfBirth = null;
-                        if (dateOfDeath.length == 0)
-                            dateOfDeath = null;
                         if (placeOfBirth.length == 0)
                             placeOfBirth = null;
                         if (placeOfDeath.length == 0)
                             placeOfDeath = null;
                         if (instrument.length == 0)
                             instrument = null;
-                        if (psuedonym.length == 0)
-                            psuedonym = null;
                         if (work.length == 0)
                             work = null;
                         if (release.length == 0)
                             release = null;
-                        if (tag.length == 0)
-                            tag = null;
                         if (wiki_link.length == 0)
                             wiki_link = null;
                         if (wiki_pageid.length == 0)
@@ -210,22 +214,20 @@ function checkCat(linkNationality) {
                         console.log("adding " + name);
                         musicians.push({
                             name: name,
+							artist_type: 'musician',
                             nationality: nationality,
                             dateOfBirth: dateOfBirth,
                             dateOfDeath: dateOfDeath,
-
-                            placeOfBirth: placeOfBirth,
-
-                            placeOfDeath: placeOfDeath,
+							placeOfBirth: placeOfBirth,
+							placeOfDeath: placeOfDeath,
                             instrument: instrument,
-                            psuedonym: psuedonym,
+                            pseudonym: pseudonym,
                             work: work,
-
-                            release: release,
-                            tag: tag,
+							release: release,
+                            tags: tags,
                             source_link: linkMusician,
-                            wikipedia_link: wiki_link,
-                            wikipedia_pageid: wiki_pageid
+                            wiki_link: wiki_link,
+                            wiki_pageid: wiki_pageid
                         })
 
                     }

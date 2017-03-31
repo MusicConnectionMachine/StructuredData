@@ -118,8 +118,21 @@ function fetch4(linkMusicianAndNationality) {
 
         var split_name = (replaceURLAndUnderscore(linkMusicianAndNationality.linkMusician)).split("(");
         var nationality = linkMusicianAndNationality.nationality;
-        var dateOfBirth = $('span[property="dbo:birthDate"]').text().trim();
-        var dateOfDeath = $('span[property="dbo:deathDate"]').text().trim();
+		
+        //to check if only one date is considered
+        //Eg:http://dbpedia.org/page/David_Breeden has two date of death entries
+        var dateOfBirth = null;
+        if($('span[property="dbo:birthDate"]').text().trim()){
+         $('span[property="dbo:birthDate"]').each(function (index) {
+            dateOfBirth = $('span[property="dbo:birthDate"]').text().trim();
+         });
+        }
+		var dateOfDeath = null;
+        if($('span[property="dbo:deathDate"]').text().trim()){
+			$('span[property="dbo:deathDate"]').each(function (index) {
+			   dateOfDeath = $('span[property="dbo:deathDate"]').text().trim();
+			});
+        }
         //birthplace
         var placeOfBirth;
         if ($('span[property="dbp:birthPlace"]').text().trim() && $('span[property="dbp:birthPlace"]').text().trim() != "") {
@@ -162,11 +175,11 @@ function fetch4(linkMusicianAndNationality) {
         }
 
         //psuedonym
-        var psuedonym = [];
+        var pseudonym = [];
         if ($('span[property="dbp:psuedonym"]').text() && $('span[property="dbp:psuedonym"]').text() != "") {
             $('span[property="dbp:psuedonym"]').each(function(index) {
                 var psuedo = replaceURLAndUnderscore($(this).text());
-                psuedonym.push(psuedo);
+                pseudonym.push(psuedo);
             });
         }
 
@@ -202,7 +215,7 @@ function fetch4(linkMusicianAndNationality) {
         }
 
         //tag
-        var tag = [];
+        var tags = [];
         substring = "classic";
         if ($('a[rel="dct:subject"]').text()) {
             $('a[rel="dct:subject"]').each(function(index) {
@@ -229,41 +242,34 @@ function fetch4(linkMusicianAndNationality) {
             work = null;
         if (release.length == 0)
             release = null;
-        if (psuedonym.length == 0)
-            psuedonym = null;
         if (nationality.length == 0)
             nationality = null;
-        if (dateOfBirth.length == 0)
-            dateOfBirth = null;
-        if (dateOfDeath.length == 0)
-            dateOfDeath = null;
         if (placeOfBirth.length == 0)
             placeOfBirth = null;
         if (placeOfDeath.length == 0)
             placeOfDeath = null;
         if (instrument.length == 0)
             instrument = null;
-        if (tag.length == 0)
-            tag = null;
         if (wiki_link.length == 0)
             wiki_link = null;
         if (wiki_pageid.length == 0)
             wiki_pageid = null;
         musicians.push({
             name: split_name[0].trim(),
+			artist_type: 'musician',
             nationality: nationality,
             dateOfBirth: dateOfBirth,
             dateOfDeath: dateOfDeath,
             placeOfBirth: placeOfBirth,
             placeOfDeath: placeOfDeath,
             instrument: instrument,
-            psuedonym: psuedonym,
+            pseudonym: pseudonym,
             work: work,
             release: release,
-            tag: tag,
+            tags: tags,
             source_link: linkMusicianAndNationality,
-            wikipedia_link: wiki_link,
-            wikipedia_pageid: wiki_pageid
+            wiki_link: wiki_link,
+            wiki_pageid: wiki_pageid
         });
     });
 }

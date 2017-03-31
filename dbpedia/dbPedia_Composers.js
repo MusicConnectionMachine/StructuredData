@@ -36,8 +36,20 @@ function getResults(queryURL, callback) {
                 name = name[0].trim();
             }
             var nationality = $('span[property="dbo:nationality"]').text().trim();
-            var dateOfBirth = $('span[property="dbo:birthDate"]').text().trim();
-            var dateOfDeath = $('span[property="dbo:deathDate"]').text().trim();
+            //to check if only one date is considered
+			//Eg:http://dbpedia.org/page/David_Breeden has two date of death entries
+			var dateOfBirth = null ;
+			if($('span[property="dbo:birthDate"]').text().trim()){
+				$('span[property="dbo:birthDate"]').each(function (index) {
+					dateOfBirth = $('span[property="dbo:birthDate"]').text().trim();
+				});
+			}
+			var dateOfDeath = null;
+			if($('span[property="dbo:deathDate"]').text().trim()){
+				$('span[property="dbo:deathDate"]').each(function (index) {
+					dateOfDeath = $('span[property="dbo:deathDate"]').text().trim();
+				});
+			}
 
             //birthplace
             var placeOfBirth;
@@ -68,12 +80,12 @@ function getResults(queryURL, callback) {
             }
 
             //psuedonym
-            var psuedonym = [];
+            var pseudonym = [];
             if ($('span[property="dbp:psuedonym"]').text() && $('span[property="dbp:psuedonym"]').text() != "") {
                 $('span[property="dbp:psuedonym"]').each(function(index) {
                     var psuedo = replaceURLAndUnderscore($(this).text());
                     if (psuedo != "")
-                        psuedonym.push(psuedo);
+                        pseudonym.push(psuedo);
                 });
             }
 
@@ -125,13 +137,13 @@ function getResults(queryURL, callback) {
             }
 
             //tag
-            var tag = [];
+            var tags = [];
             substring = "classic";
             if ($('a[rel="dct:subject"]').text()) {
                 $('a[rel="dct:subject"]').each(function(index) {
                     var rel = replaceURLAndUnderscore($(this).text());
                     if (rel.includes(substring)) {
-                        tag.push(rel.substr(4, rel.length));
+                        tags.push(rel.substr(4, rel.length));
                     }
                 });
             }
@@ -152,41 +164,34 @@ function getResults(queryURL, callback) {
                 array = null;
             if (release.length == 0)
                 release = null;
-            if (psuedonym.length == 0)
-                psuedonym = null;
             if (nationality.length == 0)
                 nationality = null;
-            if (dateOfBirth.length == 0)
-                dateOfBirth = null;
-            if (dateOfDeath.length == 0)
-                dateOfDeath = null;
             if (placeOfBirth.length == 0)
                 placeOfBirth = null;
             if (placeOfDeath.length == 0)
                 placeOfDeath = null;
             if (instrument.length == 0)
                 instrument = null;
-            if (tag.length == 0)
-                tag = null;
             if (wiki_link.length == 0)
                 wiki_link = null;
             if (wiki_pageid.length == 0)
                 wiki_pageid = null;
             newObj.push({
                 name: name,
+				artist_type: 'composer',
                 nationality: nationality,
                 dateOfBirth: dateOfBirth,
                 dateOfDeath: dateOfDeath,
                 placeOfBirth: placeOfBirth,
                 placeOfDeath: placeOfDeath,
                 instrument: instrument,
-                psuedonym: psuedonym,
+                pseudonym: pseudonym,
                 work: array,
                 release: release,
-                tag: tag,
+                tags: tags,
                 source_link: queryURL,
-                wikipedia_link: wiki_link,
-                wikipedia_pageid: wiki_pageid
+                wiki_link: wiki_link,
+                wiki_pageid: wiki_pageid
             });
         }
     });
