@@ -26,6 +26,7 @@ fs.readFile('./scrapedoutput/BrainzIDartists.json', 'utf8', function readFileCal
       if (elemNum == finalArray.length) {
           json2 = JSON.stringify(newObj); //convert it back to json
           fs.writeFile('./scrapedoutput/BrainzArtists.json', json2, 'utf8', function writeFileCallback(err, data) {
+              process.send("done");
               process.exit();
           }); // write it back
       }
