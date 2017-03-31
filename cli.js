@@ -51,8 +51,11 @@ commander
     .option('-p, --postgres ', 'Set the connection string to connect to the postgres db.')
     .parse(process.argv);
 
+const script = process.env.s ||commander.script;
+const postgresCS = process.env.p ||commander.postgres;
+
 var scriptsArray = [];
-if (commander.script == "dbpedia") {
+if (script == "dbpedia") {
     console.log("Adding dbpedia scripts");
     scriptsArray.push("./dbpedia/dbpedia_Classical_musicians_by_century.js",
         "./dbpedia/dbpedia_Classical_musicians_by_instrument.js",
@@ -61,12 +64,12 @@ if (commander.script == "dbpedia") {
         "./dbpedia/dbPedia_Composers.js"
     );
 }
-if (commander.script == "worldcat") {
+if (script== "worldcat") {
     console.log("Adding worldcat scripts");
     scriptsArray.push("./worldcat/worldcat.js"
     );
 }
-if (commander.script == "musicbrainz") {
+if (script== "musicbrainz") {
     console.log("Adding musicbrainz scripts");
     scriptsArray.push("./musicbrainz/scrapeArtists/server.js",
         "./musicbrainz/scrapeRecordings/server.js",
@@ -78,12 +81,12 @@ if (commander.script == "musicbrainz") {
         "./musicbrainz/PutJSONTogether/app.js"
     );
 }
-if (commander.script == "allmusic") {
+if (script== "allmusic") {
     console.log("Adding almusic scripts");
     scriptsArray.push("./allmusic/allMusicScript.js"
     );
 }
-if (commander.script == "test") {
+if (script== "test") {
     console.log("Adding test scripts");
     scriptsArray.push("./testscripts/test.js",
         "./testscripts/test2.js",
@@ -114,7 +117,7 @@ for (var i = 0; i < arrayLength; i++) {
 
 function populateDB() {
     console.log("Starting to populate db");
-    require(path.join(__dirname, "index.js")).connect(function (context) {
+    require(path.join(__dirname, "index.js")).connect(postgresCS,function (context) {
         const api = require("./loadModules.js")(context, function () {
             context.sequelize.sync({force: true}).then(function () {
 
