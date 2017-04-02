@@ -1,0 +1,3 @@
+# Project A / Group 1 - Structured Data [![Join the chat at https://gitter.im/MusicConnectionMachine/StructuredData](https://badges.gitter.im/MusicConnectionMachine/StructuredData.svg)](https://gitter.im/MusicConnectionMachine/StructuredData?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/d1315c1e30f8493cb42cb17ad7bf85ed)](https://www.codacy.com/app/kordianbruck/StructuredData?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=MusicConnectionMachine/StructuredData&amp;utm_campaign=Badge_Grade)
+
+In this project we will be scanning structured online resources such as DBPedia, Worldcat, MusicBrainz, IMSLP and other databases
