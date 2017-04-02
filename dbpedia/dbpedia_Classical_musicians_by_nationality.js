@@ -6,7 +6,7 @@ var jsesc = require('jsesc');
 const url = "http://dbpedia.org/page/Category:Classical_musicians_by_nationality";
 
 const outputFile = "./scrapedoutput/artists/dbpedia_Classical_musicians_by_nationality.json";
-
+console.log("---dbpedia_Classical_musicians_by_nationality.js started!---")
 var musicians = [];
 //helper functions to replace al occurrences of a string
 function replaceAll(str, find, replace) {
@@ -22,7 +22,7 @@ fs.unlink(outputFile, scrapeMainCat);
 
 function scrapeMainCat() {
     //request http://dbpedia.org/page/Category:Classical_musicians_by_nationality
-    request(url, function(error, response, body) {
+    request(url, function (error, response, body) {
         if (error) {
             console.log("Error: " + error);
         }
@@ -34,26 +34,25 @@ function scrapeMainCat() {
 
 function iterateSubCat($, callback) {
     var catArray = [];
-    $('a[rev="skos:broader"]').each(function() {
+    $('a[rev="skos:broader"]').each(function () {
         catArray.push($(this).attr('href'));
     });
 
-    catArray.forEach(function(link) {
-        checkCat(link);
+    catArray.forEach(function (link) {
         sleep(1000);
+        checkCat(link);
+
     });
     console.log("----Write to output file!----");
     jsonEntry = JSON.stringify(musicians);
     fs.writeFileSync(outputFile, jsonEntry, 'utf8');
-    process.send("done scraping dbpedia_Classical_musicians_by_nationality");
-    process.exit();
+    process.send("done dbpedia_Classical_musicians_by_nationality.js");
 
 }
 
 function checkCat(linkNationality) {
-    console.log("checking nationality :" + linkNationality);
     // go to the link of nation_classical_composers
-    request(linkNationality, function(error, response, body) {
+    request(linkNationality, function (error, response, body) {
         if (error) {
             console.log("Error: " + error);
         }
@@ -61,13 +60,12 @@ function checkCat(linkNationality) {
         if (body) {
             var $ = cheerio.load(body);
             //iterate through all of the musicians, i.e. Mozart, Brahms, ...
-            $('a[rev="dct:subject"]').each(function(index) {
+            $('a[rev="dct:subject"]').each(function (index) {
 
                 sleep(1000);
                 var linkMusician = $(this).attr('href');
-                console.log("checking musician :" + linkMusician);
                 // go to the link of the musician
-                request(jsesc(linkMusician), function(error, response, body) {
+                request(jsesc(linkMusician), function (error, response, body) {
                     if (error) {
                         console.log("Error: " + error);
                     }
@@ -82,14 +80,14 @@ function checkCat(linkNationality) {
                         //Eg:http://dbpedia.org/page/David_Breeden has two date of death entries
                         var dateOfBirth = null;
                         if ($('span[property="dbo:birthDate"]').text().trim()) {
-                            $('span[property="dbo:birthDate"]').each(function(index) {
-                                dateOfBirth = $('span[property="dbo:birthDate"]').text().trim();
+                            $('span[property="dbo:birthDate"]').each(function (index) {
+                                dateOfBirth = $(this).text().trim();
                             });
                         }
                         var dateOfDeath = null;
                         if ($('span[property="dbo:deathDate"]').text().trim()) {
-                            $('span[property="dbo:deathDate"]').each(function(index) {
-                                dateOfDeath = $('span[property="dbo:deathDate"]').text().trim();
+                            $('span[property="dbo:deathDate"]').each(function (index) {
+                                dateOfDeath = $(this).text().trim();
                             });
                         }
 
@@ -120,11 +118,11 @@ function checkCat(linkNationality) {
                         //instrument
                         var instrument = [];
                         if ($('span[property="dbp:instrument"]').text().trim() && $('span[property="dbp:instrument"]').text().trim() != "") {
-                            $('span[property="dbp:instrument"]').each(function(index) {
+                            $('span[property="dbp:instrument"]').each(function (index) {
                                 instrument.push($(this).text().trim());
                             });
                         } else if ($('a[rel="dbo:instrument"]').attr('href') && $('a[rel="dbo:instrument"]').attr('href') != "") {
-                            $('a[rel="dbo:instrument"]').each(function(index) {
+                            $('a[rel="dbo:instrument"]').each(function (index) {
                                 var inst = replaceURLAndUnderscore($(this).attr('href'));
                                 instrument.push(inst);
                             });
@@ -134,7 +132,7 @@ function checkCat(linkNationality) {
                         //pseudonym
                         var pseudonym = [];
                         if ($('span[property="dbp:psuedonym"]').text() && $('span[property="dbp:psuedonym"]').text() != "") {
-                            $('span[property="dbp:psuedonym"]').each(function(index) {
+                            $('span[property="dbp:psuedonym"]').each(function (index) {
                                 var psuedo = replaceURLAndUnderscore($(this).text());
                                 pseudonym.push(psuedo);
                             });
@@ -143,11 +141,11 @@ function checkCat(linkNationality) {
                         // work
                         var work = [];
                         if ($('span[property="dbp:writer"]').text().trim() && $('span[property="dbp:writer"]').text().trim() != "") {
-                            $('span[property="dbp:writer"]').each(function(index) {
+                            $('span[property="dbp:writer"]').each(function (index) {
                                 instrument.push($(this).text().trim());
                             });
                         } else if ($('a[rel="dbo:writer"]').attr('href') && $('a[rel="dbo:writer"]').attr('href') != "") {
-                            $('a[rel="dbo:writer"]').each(function(index) {
+                            $('a[rel="dbo:writer"]').each(function (index) {
                                 var inst = replaceURLAndUnderscore($(this).attr('href'));
                                 instrument.push(inst);
                             });
@@ -156,7 +154,7 @@ function checkCat(linkNationality) {
                         //release
                         var release = [];
                         if ($('a[rel="dbp:artist"]').attr('href') && $('a[rel="dbp:artist"]').attr('href') != "") {
-                            $('a[rel="dbp:artist"]').each(function(index) {
+                            $('a[rel="dbp:artist"]').each(function (index) {
                                 var rel = replaceURLAndUnderscore($(this).attr('href'));
                                 release.push(rel);
                             });
@@ -164,7 +162,7 @@ function checkCat(linkNationality) {
 
                         var tags = [];
                         if ($('a[rel="dct:subject"]').attr('href') && $('a[rel="dct:subject"]').attr('href') != "") {
-                            $('a[rel="dct:subject"]').each(function(index) {
+                            $('a[rel="dct:subject"]').each(function (index) {
                                 if ($(this).attr('href').includes("classic")) {
                                     var t = replaceURLAndUnderscore($(this).attr('href').replace("Category:", ""));
                                     tags.push(t);
@@ -196,7 +194,7 @@ function checkCat(linkNationality) {
                         if (wiki_pageid.length == 0)
                             wiki_pageid = null;
 
-                        console.log("adding " + name);
+                        //console.log("dbpedia_Classical_musicians_by_nationality.js adding entity");
                         musicians.push({
                             name: name,
                             artist_type: 'musician',
