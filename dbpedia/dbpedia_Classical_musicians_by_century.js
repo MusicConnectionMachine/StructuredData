@@ -4,207 +4,96 @@ var sleep = require('system-sleep');
 var request = require("request");
 var cheerio = require('cheerio');
 var jsesc = require('jsesc');
-var source_link = [],
-    url = [],
+const replaceURLAndUnderscore = require('./helper/replaceURLAndUnderscore');
+
+var url = [],
     musicians = [];
 url.push("http://dbpedia.org/page/Category:21st-century_classical_musicians");
 url.push("http://dbpedia.org/page/Category:20th-century_classical_musicians");
 url.push("http://dbpedia.org/page/Category:19th-century_classical_musicians");
 url.push("http://dbpedia.org/page/Category:18th-century_classical_musicians");
 url.push("http://dbpedia.org/page/Category:17th-century_classical_musicians");
-console.log(url);
-console.log('request started!');
+console.log("---dbpedia_Classical_musicians_by_century.js started!---")
 
-
-url.forEach(function(value) {
-    fetch1(value);
+var counter = 0
+url.forEach(function (value) {
+    scrapeCategory(value, function () {
+        counter++;
+        if (counter == url.length) {
+            var json2 = JSON.stringify(musicians); //convert it back to json
+            fs.writeFileSync('./scrapedoutput/artists/dbpedia_Classical_musicians_by_century.json', json2, 'utf8'); // write it back
+            process.send("done dbpedia_Classical_musicians_by_century.js");
+        }
+    });
 });
 
-//helper functions to replace all occurrences of a string
-function replaceAll(str, find, replace) {
-    return str.replace(new RegExp(find, 'g'), replace);
-}
 
-function replaceURLAndUnderscore(str) {
-    str = str.replace("http://dbpedia.org/resource/", "")
-    return replaceAll(str, "_", " ")
-}
-
-function fetch1(link1) {
-    request(link1, function(error, response, body) {
+function scrapeCategory(link1, callback) {
+    request(link1, function (error, response, body) {
+        var source_link = []
+        if (error) {
+            console.log("dbpedia_Classical_musicians_by_century.js scrapeCategory: " + error);
+            return
+        }
         $ = cheerio.load(body);
 
-        $('a[rev="dct:subject"]').each(function(i, element) {
+        $('a[rev="dct:subject"]').each(function (i, element) {
             var a = $(this);
             source_link.push(a.attr('href'));
         });
-        console.log(source_link.length);
 
-        source_link.forEach(function(value) {
-            fetch2(value);
+        source_link.forEach(function (value) {
+            scrapeArtist(value);
             sleep(1000);
-
         });
-        var json2 = JSON.stringify(musicians); //convert it back to json
-        fs.writeFileSync('../scraped_output/artists/dbpedia_Classical_musicians_by_century.json', json2, 'utf8'); // write it back
-        process.send("done scraping");
-        process.exit();
+        callback();
+
+
     });
 }
 
 
-function fetch2(value2) {
-    console.log(value2);
-    request(jsesc(value2), function(error, response, body) {
+function scrapeArtist(source_link) {
+    request(jsesc(source_link), function (error, response, body) {
+        if (error) {
+            console.log("dbpedia_Classical_musicians_by_century.js scrapeArtist: " + error);
+            return
+        }
         $ = cheerio.load(body);
-        var split_name = (replaceURLAndUnderscore(value2)).split("(");
+        var split_name = (replaceURLAndUnderscore(source_link)).split("(");
+
         var nationality = $('span[property="dbo:nationality"]').text().trim();
-        //to check if only one date is considered
-        //Eg:http://dbpedia.org/page/David_Breeden has two date of death entries
-        var dateOfBirth = null;
-        if ($('span[property="dbo:birthDate"]').text().trim()) {
-            $('span[property="dbo:birthDate"]').each(function(index) {
-                dateOfBirth = $('span[property="dbo:birthDate"]').text().trim();
-            });
-        }
-        var dateOfDeath = null;
-        if ($('span[property="dbo:deathDate"]').text().trim()) {
-            $('span[property="dbo:deathDate"]').each(function(index) {
-                dateOfDeath = $('span[property="dbo:deathDate"]').text().trim();
-            });
-        }
-        //birthplace
-        var placeOfBirth;
-        if ($('span[property="dbp:birthPlace"]').text().trim() && $('span[property="dbp:birthPlace"]').text().trim() != "") {
-            placeOfBirth = $('span[property="dbp:birthPlace"]').text().trim();
-        } else if ($('span[property="dbp:placeOfBirth"]').text().trim() && $('span[property="dbp:placeOfBirth"]').text().trim() != "") {
-            placeOfBirth = $('span[property="dbp:placeOfBirth"]').text().trim();
-        } else if ($('a[rel="dbo:placeOfBirth"]').attr('href') && $('a[rel="dbo:placeOfBirth"]').attr('href') != "") {
-            placeOfBirth = replaceURLAndUnderscore($('a[rel="dbo:placeOfBirth"]').attr('href'));
-        } else if ($('a[rel="dbo:birthPlace"]').attr('href') && $('a[rel="dbo:birthPlace"]').attr('href') != "") {
-            placeOfBirth = replaceURLAndUnderscore($('a[rel="dbo:birthPlace"]').attr('href'));
-        } else {
-            placeOfBirth = "";
-        }
-
-        //placeOfDeath
-        var placeOfDeath;
-        if ($('span[property="dbp:placeOfDeath"]').text().trim() && $('span[property="dbp:placeOfDeath"]').text().trim() != "") {
-            placeOfDeath = $('span[property="dbp:placeOfDeath"]').text().trim();
-        } else if ($('span[property="dbp:deathPlace"]').text().trim() && $('span[property="dbp:deathPlace"]').text().trim() != "") {
-            placeOfDeath = $('span[property="dbp:deathPlace"]').text().trim();
-        } else if ($('a[rel="dbo:placeOfDeath"]').attr('href') && $('a[rel="dbo:placeOfDeath"]').attr('href') != "") {
-            placeOfDeath = replaceURLAndUnderscore($('a[rel="dbo:placeOfDeath"]').attr('href'));
-        } else if ($('a[rel="dbo:deathPlace"]').attr('href') && $('a[rel="dbo:deathPlace"]').attr('href') != "") {
-            placeOfDeath = replaceURLAndUnderscore($('a[rel="dbo:deathPlace"]').attr('href'));
-        } else {
-            placeOfDeath = "";
-        }
-
-        //instrument
-        var instrument = [];
-        if ($('span[property="dbp:instrument"]').text().trim() && $('span[property="dbp:instrument"]').text().trim() != "") {
-            $('span[property="dbp:instrument"]').each(function(index) {
-                instrument.push($(this).text().trim());
-            });
-        } else if ($('a[rel="dbo:instrument"]').attr('href') && $('a[rel="dbo:instrument"]').attr('href') != "") {
-            $('a[rel="dbo:instrument"]').each(function(index) {
-                var inst = replaceURLAndUnderscore($(this).attr('href'));
-                instrument.push(inst);
-            });
-        }
-
-        //psuedonym
-        var pseudonym = [];
-        if ($('span[property="dbp:psuedonym"]').text() && $('span[property="dbp:psuedonym"]').text() != "") {
-            $('span[property="dbp:psuedonym"]').each(function(index) {
-                var psuedo = replaceURLAndUnderscore($(this).text());
-                pseudonym.push(psuedo);
-            });
-        }
-
-        //work
-        var work = [];
-        if ($('a[rev="dbo:writer"]').text() && $('a[rev="dbo:writer"]').text() != "") {
-            $('a[rev="dbo:writer"]').each(function(index) {
-                var rel = replaceURLAndUnderscore($(this).text());
-                work.push(rel);
-            });
-        }
-
-        if ($('a[rev="dbp:writer"]').text() && $('a[rev="dbp:writer"]').text() != "") {
-            $('a[rev="dbp:writer"]').each(function(index) {
-                var rel = replaceURLAndUnderscore($(this).text());
-                work.push(rel);
-            });
-        }
-        //release
-        var release = [];
-        if ($('a[rel="dbp:artist"]').attr('href') && $('a[rel="dbp:artist"]').attr('href') != "") {
-            $('a[rel="dbp:artist"]').each(function(index) {
-                var rel = replaceURLAndUnderscore($(this).attr('href'));
-                release.push(rel);
-            });
-        }
-
-        if ($('a[rel="dbo:artist"]').attr('href') && $('a[rel="dbo:artist"]').attr('href') != "") {
-            $('a[rel="dbo:artist"]').each(function(index) {
-                var rel = replaceURLAndUnderscore($(this).attr('href'));
-                release.push(rel);
-            });
-        }
-
-        //tag
-        var tags = [];
-        substring = "classic";
-        if ($('a[rel="dct:subject"]').text()) {
-            $('a[rel="dct:subject"]').each(function(index) {
-                var rel = replaceURLAndUnderscore($(this).text());
-                if (rel.includes(substring)) {
-                    tags.push(rel.substr(4, rel.length));
-                }
-            });
-        }
-        // wiki link
-        var wiki_link = "";
-        if ($('a[rel="foaf:isPrimaryTopicOf"]').attr('href'))
-            wiki_link = $('a[rel="foaf:isPrimaryTopicOf"]').attr('href');
-        else if ($('a[rel="foaf:primaryTopic"]').attr('href'))
-            wiki_link = $('a[rel="foaf:primaryTopic"]').attr('href');
-
-        // wiki page id
-        var wiki_pageid = "";
-        if ($('span[property="dbo:wikiPageID"]').text()) {
-            wiki_pageid = $('span[property="dbo:wikiPageID"]').text();
-        }
-
         if (nationality.length == 0)
             nationality = null;
-        if (placeOfBirth.length == 0)
-            placeOfBirth = null;
-        if (placeOfDeath.length == 0)
-            placeOfDeath = null;
-        if (wiki_link.length == 0)
-            wiki_link = null;
-        if (wiki_pageid.length == 0)
-            wiki_pageid = null;
 
-        musicians.push({
-            name: split_name[0].trim(),
-            artist_type: 'musician',
-            nationality: nationality,
-            dateOfBirth: dateOfBirth,
-            dateOfDeath: dateOfDeath,
-            placeOfBirth: placeOfBirth,
-            placeOfDeath: placeOfDeath,
-            instrument: instrument,
-            pseudonym: pseudonym,
-            work: work,
-            release: release,
-            tags: tags,
-            source_link: value2,
-            wiki_link: wiki_link,
-            wiki_pageid: wiki_pageid
-        });
+        var scrapedbpediaProperties = require('./helper/scrapedbpediaProperties.js');
+
+        var scrapedData = scrapedbpediaProperties($);
+
+        //only add artist if he hasn't been added
+        if (!musicians.some(function (element) {
+                return element.source_link == source_link;
+            })) {
+
+            musicians.push({
+                name: split_name[0].trim(),
+                artist_type: 'musician',
+                nationality: nationality,
+                source_link: source_link,
+                dateOfBirth: scrapedData.dateOfBirth,
+                dateOfDeath: scrapedData.dateOfDeath,
+                placeOfBirth: scrapedData.placeOfBirth,
+                placeOfDeath: scrapedData.placeOfDeath,
+                instrument: scrapedData.instrument,
+                pseudonym: scrapedData.pseudonym,
+                work: scrapedData.work,
+                release: scrapedData.release,
+                tags: scrapedData.tags,
+                wiki_link: scrapedData.wiki_link,
+                wiki_pageid: scrapedData.wiki_pageid
+
+
+            });
+        }
     });
 }
