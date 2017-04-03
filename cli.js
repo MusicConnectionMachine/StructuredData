@@ -128,6 +128,10 @@ function populateDB() {
                 const artists = context.component('models').module('artists');
                 const artistspath = path.join(__dirname, "scrapedoutput", "artists")
                 fs.readdir(artistspath, (err, files) => {
+                    if (err) {
+                        console.log(err);
+                        return;
+                    }
                     files.forEach(file => {
                         //for each file, read  it and do bulk create
                         fs.readFile(path.join(artistspath, file), function (err, data) {
@@ -145,6 +149,10 @@ function populateDB() {
                 const works = context.component('models').module('works');
                 const workspath = path.join(__dirname, "scrapedoutput", "works")
                 fs.readdir(workspath, (err, files) => {
+                    if (err) {
+                        console.log(err);
+                        return;
+                    }
                     files.forEach(file => {
                         //for each file, read  it and do bulk create
                         fs.readFile(path.join(workspath, file), function (err, data) {
@@ -162,6 +170,10 @@ function populateDB() {
                 const releases = context.component('models').module('releases');
                 const releasespath = path.join(__dirname, "scrapedoutput", "releases")
                 fs.readdir(releasespath, (err, files) => {
+                    if (err) {
+                        console.log(err);
+                        return;
+                    }
                     files.forEach(file => {
                         //for each file, read  it and do bulk create
                         fs.readFile(path.join(releasespath, file), function (err, data) {
