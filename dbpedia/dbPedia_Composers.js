@@ -27,61 +27,62 @@ url.forEach(function (value) {
 
 function getURL(value, callback) {
     request(jsesc(value), function (error, response, html) {
-        if (!error) {
-            var $ = cheerio.load(html);
-            $('a[rev="dct:subject"]').each(function (i, element) {
-                var a = $(this);
-                var queryURL = a.attr('href');
-                link.push(queryURL);
-            });
-            link.forEach(function (value) {
-                getResults(value, function (name) {
-                });
-                sleep(1000);
-            });
-
-            callback();
+        if (error) {
+            console.log("dbPedia_Composers.js getURL: " + error);
+            return
         }
+        var $ = cheerio.load(html);
+        $('a[rev="dct:subject"]').each(function (i, element) {
+            var a = $(this);
+            var queryURL = a.attr('href');
+            link.push(queryURL);
+        });
+        link.forEach(function (value) {
+            getArtist(value);
+            sleep(1000);
+        });
+
+        callback();
+
     });
 }
 
-function getResults(queryURL, callback) {
-    name = "done";
+function getArtist(queryURL) {
     request(jsesc(queryURL), function (error, response, html) {
-        if (!html) {
-            return;
+        if (error) {
+            console.log("dbPedia_Composers.js getArtist: " + error);
+            return
         }
         var $ = cheerio.load(html);
-        if (html != null) {
-            //name
-            name = $('span[property="dbp:name"]').text();
-            if (!name) {
-                var name = (replaceURLAndUnderscore(queryURL)).split("(");
-                name = name[0].trim();
-            }
-            var nationality = $('span[property="dbo:nationality"]').text().trim();
-            if (nationality.length == 0)
-                nationality = null;
 
-
-            var scrapedbpediaProperties = require('./helper/scrapedbpediaProperties.js');
-
-            var scrapedData = scrapedbpediaProperties($);
-
-            //only add artist if he hasn't been added
-            if (!newObj.some(function (element) {
-                    return element.scrapedData.wiki_pageid == scrapedData.wiki_pageid;
-                })) {
-                newObj.push({
-                    name: name,
-                    artist_type: 'composer',
-                    nationality: nationality,
-                    source_link: queryURL,
-                    scrapedData
-                });
-            }
+        //name
+        name = $('span[property="dbp:name"]').text();
+        if (!name) {
+            var name = (replaceURLAndUnderscore(queryURL)).split("(");
+            name = name[0].trim();
         }
+        var nationality = $('span[property="dbo:nationality"]').text().trim();
+        if (nationality.length == 0)
+            nationality = null;
+
+
+        var scrapedbpediaProperties = require('./helper/scrapedbpediaProperties.js');
+
+        var scrapedData = scrapedbpediaProperties($);
+
+        //only add artist if he hasn't been added
+        if (!newObj.some(function (element) {
+                return element.scrapedData.wiki_pageid == scrapedData.wiki_pageid;
+            })) {
+            newObj.push({
+                name: name,
+                artist_type: 'composer',
+                nationality: nationality,
+                source_link: queryURL,
+                scrapedData
+            });
+        }
+
     });
-    return callback(name);
 }
 
