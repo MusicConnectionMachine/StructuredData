@@ -108,6 +108,7 @@ function scrapeSubCat(linkNationality) {
 
 function scrapeArtist(linkMusicianAndNationality) {
     request(jsesc(linkMusicianAndNationality.linkMusician), function (error, response, body) {
+
         if (error) {
             console.log("dbpedia_Classical_musicians_by_instrument_and_nationality.js scrapeArtist: " + error);
             return
@@ -130,7 +131,17 @@ function scrapeArtist(linkMusicianAndNationality) {
             artist_type: 'musician',
             nationality: nationality,
             source_link: linkMusicianAndNationality,
-            scrapedData
+            dateOfBirth: scrapedData.dateOfBirth,
+            dateOfDeath: scrapedData.dateOfDeath,
+            placeOfBirth: scrapedData.placeOfBirth,
+            placeOfDeath: scrapedData.placeOfDeath,
+            instrument: scrapedData.instrument,
+            pseudonym: scrapedData.pseudonym,
+            work: scrapedData.work,
+            release: scrapedData.release,
+            tags: scrapedData.tags,
+            wiki_link: scrapedData.wiki_link,
+            wiki_pageid: scrapedData.wiki_pageid
         });
 
 

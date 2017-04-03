@@ -65,6 +65,7 @@ function scrapeCat(value2) {
 
 function scrapeArtist(value2) {
     request(jsesc(value2), function (error, response, body) {
+
         if (error) {
             console.log("dbpedia_Classical_musicians_by_instrument.js scrapeArtist: " + error);
             return
@@ -84,7 +85,17 @@ function scrapeArtist(value2) {
             artist_type: 'musician',
             nationality: nationality,
             source_link: value2,
-            scrapedData
+            dateOfBirth: scrapedData.dateOfBirth,
+            dateOfDeath: scrapedData.dateOfDeath,
+            placeOfBirth: scrapedData.placeOfBirth,
+            placeOfDeath: scrapedData.placeOfDeath,
+            instrument: scrapedData.instrument,
+            pseudonym: scrapedData.pseudonym,
+            work: scrapedData.work,
+            release: scrapedData.release,
+            tags: scrapedData.tags,
+            wiki_link: scrapedData.wiki_link,
+            wiki_pageid: scrapedData.wiki_pageid
         });
     });
 }

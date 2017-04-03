@@ -47,8 +47,9 @@ function getURL(value, callback) {
     });
 }
 
-function getArtist(queryURL) {
-    request(jsesc(queryURL), function (error, response, html) {
+function getArtist(source_link) {
+    request(jsesc(source_link), function (error, response, html) {
+
         if (error) {
             console.log("dbPedia_Composers.js getArtist: " + error);
             return
@@ -58,7 +59,7 @@ function getArtist(queryURL) {
         //name
         name = $('span[property="dbp:name"]').text();
         if (!name) {
-            var name = (replaceURLAndUnderscore(queryURL)).split("(");
+            var name = (replaceURLAndUnderscore(source_link)).split("(");
             name = name[0].trim();
         }
         var nationality = $('span[property="dbo:nationality"]').text().trim();
@@ -72,14 +73,24 @@ function getArtist(queryURL) {
 
         //only add artist if he hasn't been added
         if (!newObj.some(function (element) {
-                return element.scrapedData.wiki_pageid == scrapedData.wiki_pageid;
+                return element.source_link == source_link;
             })) {
             newObj.push({
                 name: name,
                 artist_type: 'composer',
                 nationality: nationality,
-                source_link: queryURL,
-                scrapedData
+                source_link: source_link,
+                dateOfBirth: scrapedData.dateOfBirth,
+                dateOfDeath: scrapedData.dateOfDeath,
+                placeOfBirth: scrapedData.placeOfBirth,
+                placeOfDeath: scrapedData.placeOfDeath,
+                instrument: scrapedData.instrument,
+                pseudonym: scrapedData.pseudonym,
+                work: scrapedData.work,
+                release: scrapedData.release,
+                tags: scrapedData.tags,
+                wiki_link: scrapedData.wiki_link,
+                wiki_pageid: scrapedData.wiki_pageid
             });
         }
 

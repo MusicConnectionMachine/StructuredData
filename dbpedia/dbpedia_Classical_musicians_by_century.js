@@ -5,8 +5,8 @@ var request = require("request");
 var cheerio = require('cheerio');
 var jsesc = require('jsesc');
 const replaceURLAndUnderscore = require('./helper/replaceURLAndUnderscore');
-var source_link = [],
-    url = [],
+
+var url = [],
     musicians = [];
 url.push("http://dbpedia.org/page/Category:21st-century_classical_musicians");
 url.push("http://dbpedia.org/page/Category:20th-century_classical_musicians");
@@ -30,6 +30,7 @@ url.forEach(function (value) {
 
 function scrapeCategory(link1, callback) {
     request(link1, function (error, response, body) {
+        var source_link = []
         if (error) {
             console.log("dbpedia_Classical_musicians_by_century.js scrapeCategory: " + error);
             return
@@ -52,14 +53,14 @@ function scrapeCategory(link1, callback) {
 }
 
 
-function scrapeArtist(value2) {
-    request(jsesc(value2), function (error, response, body) {
+function scrapeArtist(source_link) {
+    request(jsesc(source_link), function (error, response, body) {
         if (error) {
             console.log("dbpedia_Classical_musicians_by_century.js scrapeArtist: " + error);
             return
         }
         $ = cheerio.load(body);
-        var split_name = (replaceURLAndUnderscore(value2)).split("(");
+        var split_name = (replaceURLAndUnderscore(source_link)).split("(");
 
         var nationality = $('span[property="dbo:nationality"]').text().trim();
         if (nationality.length == 0)
@@ -71,15 +72,26 @@ function scrapeArtist(value2) {
 
         //only add artist if he hasn't been added
         if (!musicians.some(function (element) {
-                return element.scrapedData.wiki_pageid == scrapedData.wiki_pageid;
+                return element.source_link == source_link;
             })) {
 
             musicians.push({
                 name: split_name[0].trim(),
                 artist_type: 'musician',
                 nationality: nationality,
-                source_link: value2,
-                scrapedData
+                source_link: source_link,
+                dateOfBirth: scrapedData.dateOfBirth,
+                dateOfDeath: scrapedData.dateOfDeath,
+                placeOfBirth: scrapedData.placeOfBirth,
+                placeOfDeath: scrapedData.placeOfDeath,
+                instrument: scrapedData.instrument,
+                pseudonym: scrapedData.pseudonym,
+                work: scrapedData.work,
+                release: scrapedData.release,
+                tags: scrapedData.tags,
+                wiki_link: scrapedData.wiki_link,
+                wiki_pageid: scrapedData.wiki_pageid
+
 
             });
         }

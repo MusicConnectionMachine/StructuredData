@@ -72,7 +72,7 @@ function checkArtist(linkMusician, linkNationality) {
 
         var $ = cheerio.load(body);
         //extract infos
-        var name = replaceURLAndUnderscore(linkMusician);
+        var name = replaceURLAndUnderscore(linkMusician).split("(");
 
         var nationality = linkNationality.replace("http://dbpedia.org/page/Category:", "").replace("http://dbpedia.org/resource/Category:", "").replace("_classical_musicians", "");
         if (nationality.length == 0)
@@ -83,11 +83,21 @@ function checkArtist(linkMusician, linkNationality) {
         var scrapedData = scrapedbpediaProperties($);
 
         musicians.push({
-            name: name,
+            name: name[0].trim(),
             artist_type: 'musician',
             nationality: nationality,
             source_link: linkMusician,
-            scrapedData
+            dateOfBirth: scrapedData.dateOfBirth,
+            dateOfDeath: scrapedData.dateOfDeath,
+            placeOfBirth: scrapedData.placeOfBirth,
+            placeOfDeath: scrapedData.placeOfDeath,
+            instrument: scrapedData.instrument,
+            pseudonym: scrapedData.pseudonym,
+            work: scrapedData.work,
+            release: scrapedData.release,
+            tags: scrapedData.tags,
+            wiki_link: scrapedData.wiki_link,
+            wiki_pageid: scrapedData.wiki_pageid
         })
     })
 }
