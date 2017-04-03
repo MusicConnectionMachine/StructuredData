@@ -68,14 +68,18 @@ function getResults(queryURL, callback) {
 
             var scrapedData = scrapedbpediaProperties($);
 
-
-            newObj.push({
-                name: name,
-                artist_type: 'composer',
-                nationality: nationality,
-                source_link: queryURL,
-                scrapedData
-            });
+            //only add artist if he hasn't been added
+            if (!newObj.some(function (element) {
+                    return element.scrapedData.wiki_pageid == scrapedData.wiki_pageid;
+                })) {
+                newObj.push({
+                    name: name,
+                    artist_type: 'composer',
+                    nationality: nationality,
+                    source_link: queryURL,
+                    scrapedData
+                });
+            }
         }
     });
     return callback(name);

@@ -17,7 +17,6 @@ console.log("---dbpedia_Classical_musicians_by_century.js started!---")
 
 var counter = 0
 url.forEach(function (value) {
-
     scrapeCategory(value, function () {
         counter++;
         if (counter == url.length) {
@@ -27,8 +26,6 @@ url.forEach(function (value) {
         }
     });
 });
-
-
 
 
 function scrapeCategory(link1, callback) {
@@ -67,14 +64,21 @@ function scrapeArtist(value2) {
 
             var scrapedData = scrapedbpediaProperties($);
 
-            musicians.push({
-                name: split_name[0].trim(),
-                artist_type: 'musician',
-                nationality: nationality,
-                source_link: value2,
-                scrapedData
+            //only add artist if he hasn't been added
+            if (!musicians.some(function (element) {
+                    return element.scrapedData.wiki_pageid == scrapedData.wiki_pageid;
+                })) {
 
-            });
+                musicians.push({
+                    name: split_name[0].trim(),
+                    artist_type: 'musician',
+                    nationality: nationality,
+                    source_link: value2,
+                    scrapedData
+
+                });
+            }
+
         }
 
     });
