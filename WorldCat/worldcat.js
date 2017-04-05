@@ -65,7 +65,7 @@ function fname() {
                 k = k + 1;
             }
             var json2 = JSON.stringify(musicians); //convert it back to json
-            fs.writeFileSync('../scraped_output/releases/worldcat.json', json2, 'utf8'); // write it back
+            fs.writeFileSync('./scrapedoutput/releases/worldcat.json', json2, 'utf8'); // write it back
             clearInterval(refreshIntervalId);
             process.send("done scraping");
             process.exit();
