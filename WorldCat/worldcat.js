@@ -1,6 +1,7 @@
 var fs = require('fs');
 var request = require('request');
 var ceil = require('math-ceil');
+var floor = require('math-floor');
 var numeral = require('numeral');
 var cheerio = require('cheerio');
 var page = 1,
@@ -12,8 +13,8 @@ var page = 1,
 var source_link = [],
     musicians = [],
     recording = [],
-    artist = [];
-var url = "https://www.worldcat.org/search?q=dt%3Asco&fq=&dblist=638&qt=page_number_link&start=" + page;
+    author = [];
+var url = "https://www.worldcat.org/search?q=dt%3Asco&fq=yr%3A1800&dblist=638&qt=page_number_link&start=" + page;
 console.log(url);
 var refreshIntervalId = setInterval(fname, 2000);
 
@@ -38,40 +39,38 @@ function fname() {
                 recording.push(replaceTabNewLine($(this).text()));
             });
             $('td .author').each(function() {
-                artist.push(replaceTabNewLine($(this).text()));
+                author.push(replaceTabNewLine($(this).text()));
             });
-
+            source_link.push(url);
             page = page + 10;
             j = j + 1;
             if (j > total_links) {
             k = 0;
-            while (k < 10) {
+            while (k < total_records) {
                 var release = [],
-                    name = [];
-                name = recording;
-                release = artist[k].split(";");
-                release[0] = release[0].substr(3, release[0].length);
-                console.log(name[k]);
-                console.log(release);
-                for (var index = 0; index < release.length; index++) {
-                    release[index] = release[index].trim();
-                    if (release[index] == "")
-                        release = release.splice(index, 1);
+                    title = [];
+                title = recording;
+                artist = author[k].split(";");
+                artist[0] = artist[0].substr(3, artist[0].length);
+                for (var index = 0; index < artist.length; index++) {
+                    artist[index] = artist[index].trim();
+                    if (artist[index] == "")
+                        artist = artist.splice(index, 1);
                 }
-                console.log(release);
                 musicians.push({
-                    release: release,
-                    name: name[k],
-                    source_link: source_link
+                    title: title[k],
+                    artist: artist,
+                    source_link: source_link[floor(k/10)]
                 });
                 k = k + 1;
             }
             var json2 = JSON.stringify(musicians); //convert it back to json
-            fs.writeFileSync('worldcat.json', json2, 'utf8'); // write it back
+            fs.writeFileSync('../scraped_output/releases/worldcat.json', json2, 'utf8'); // write it back
             clearInterval(refreshIntervalId);
+            process.send("done scraping");
             process.exit();
         }
-        url = "https://www.worldcat.org/search?q=dt%3Asco&fq=&dblist=638&qt=page_number_link&start=" + page; console.log(url);
+        url = "https://www.worldcat.org/search?q=dt%3Asco&fq=yr%3A1800&dblist=638&qt=page_number_link&start=" + page;
     });
 }
 
