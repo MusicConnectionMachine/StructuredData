@@ -21,6 +21,7 @@
     "fs": "0.0.1-security",
     "jsesc": "2.4.0",
     "math-ceil": "1.0.0",
+    "math-floor": "^1.0.1",
     "numeral": "2.0.6",
     "path": "^0.12.7",
     "pg": "^6.1.5",
