@@ -19,32 +19,32 @@ console.log(url);
 var refreshIntervalId = setInterval(fname, 2000);
 
 function fname() {
-    request(url, function(error, response, body) {
-            $ = cheerio.load(body);
-            // Finds total records
-            if (page == 1) {
-                total_records = $('.resultsinfo strong').text();
-                $('.resultsinfo strong').each(function() {
-                    if (i == 1) {
-                        total_records = $(this).text();
-                    }
-                    i = i + 1;
-                });
-                console.log(total_records);
-                total_links = ceil((numeral(total_records)).value() / 10);
-                console.log(total_links);
-            }
+    request(url, function (error, response, body) {
+        $ = cheerio.load(body);
+        // Finds total records
+        if (page == 1) {
+            total_records = $('.resultsinfo strong').text();
+            $('.resultsinfo strong').each(function () {
+                if (i == 1) {
+                    total_records = $(this).text();
+                }
+                i = i + 1;
+            });
+            console.log("total records: " + total_records);
+            total_links = ceil((numeral(total_records)).value() / 10);
+            console.log("total links: " + total_links);
+        }
 
-            $('td .name').each(function() {
-                recording.push(replaceTabNewLine($(this).text()));
-            });
-            $('td .author').each(function() {
-                author.push(replaceTabNewLine($(this).text()));
-            });
-            source_link.push(url);
-            page = page + 10;
-            j = j + 1;
-            if (j > total_links) {
+        $('td .name').each(function () {
+            recording.push(replaceTabNewLine($(this).text()));
+        });
+        $('td .author').each(function () {
+            author.push(replaceTabNewLine($(this).text()));
+        });
+        source_link.push(url);
+        page = page + 10;
+        j = j + 1;
+        if (j > total_links) {
             k = 0;
             while (k < total_records) {
                 var release = [],
@@ -60,7 +60,7 @@ function fname() {
                 musicians.push({
                     title: title[k],
                     artist: artist,
-                    source_link: source_link[floor(k/10)]
+                    source_link: source_link[floor(k / 10)]
                 });
                 k = k + 1;
             }
