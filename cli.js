@@ -89,8 +89,8 @@ if (cluster.isMaster) {
 
     }
 
-    cluster.on('exit', function (worker, code, signal) {
-        console.log('Worker ' + worker.process.pid + ' died with code: ' + code + ', and signal: ' + signal);
+    cluster.on('exit', function (deadworker, code, signal) {
+        console.log('Worker ' + deadworker.process.pid + ' died with code: ' + code + ', and signal: ' + signal);
         var scriptToExecute = scriptsArray.pop();
         if (scriptToExecute) {
             // if a worker dies and there are still remaining scripts, spawn a new worker and let him execute it
@@ -102,7 +102,7 @@ if (cluster.isMaster) {
 
     cluster.on('message', function (m) {
         scrapingcounter--;
-        if (scrapingcounter == 0) {
+        if (scrapingcounter === 0) {
             //once all scraping scripts finished, populate the db
             console.log("all done");
             populateDB();
@@ -110,7 +110,7 @@ if (cluster.isMaster) {
     });
 }
 else {
-    process.on('message', function (scriptToExecute) {
+    process.on("message", function (scriptToExecute) {
         console.log("Worker is executing " + scriptToExecute);
         var script = require(scriptToExecute);
         script(function () {
@@ -134,10 +134,10 @@ function populateDB() {
             const artists = context.models.artists;
             const artistspath = path.join(__dirname, "scrapedoutput", "artists")
             fs.readdir(artistspath, (err, files) => {
-              if (err) {
-                        console.log(err);
-                        return;
-                    }
+                if (err) {
+                    console.log(err);
+                    return;
+                }
                 files.forEach(file => {
                     //for each file, read  it and do bulk create
                     fs.readFile(path.join(artistspath, file), function (err, data) {
@@ -146,7 +146,6 @@ function populateDB() {
                                 console.log("Created artist entries for " + file);
                             }).catch(function (error) {
                             console.log("error: " + error);
-
                         })
                     })
                 });
@@ -157,10 +156,10 @@ function populateDB() {
             const works = context.models.works;
             const workspath = path.join(__dirname, "scrapedoutput", "works")
             fs.readdir(workspath, (err, files) => {
-              if (err) {
-                        console.log(err);
-                        return;
-                    }
+                if (err) {
+                    console.log(err);
+                    return;
+                }
                 files.forEach(file => {
                     //for each file, read  it and do bulk create
                     fs.readFile(path.join(workspath, file), function (err, data) {
@@ -169,10 +168,7 @@ function populateDB() {
                                 console.log("Created work entries for " + file);
                             }).catch(function (error) {
                             console.log("error: " + error);
-
-                            })
-
-                        
+                        })
                     })
                 });
             });
@@ -182,10 +178,10 @@ function populateDB() {
             const releases = context.models.releases;
             const releasespath = path.join(__dirname, "scrapedoutput", "releases")
             fs.readdir(releasespath, (err, files) => {
-              if (err) {
-                        console.log(err);
-                        return;
-                    }
+                if (err) {
+                    console.log(err);
+                    return;
+                }
                 files.forEach(file => {
                     //for each file, read  it and do bulk create
                     fs.readFile(path.join(releasespath, file), function (err, data) {
@@ -194,9 +190,6 @@ function populateDB() {
                                 console.log("Created release entries for " + file);
                             }).catch(function (error) {
                             console.log("error: " + error);
-
-                
-                
                         })
                     })
                 });
