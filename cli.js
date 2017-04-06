@@ -134,6 +134,10 @@ function populateDB() {
             const artists = context.models.artists;
             const artistspath = path.join(__dirname, "scrapedoutput", "artists")
             fs.readdir(artistspath, (err, files) => {
+              if (err) {
+                        console.log(err);
+                        return;
+                    }
                 files.forEach(file => {
                     //for each file, read  it and do bulk create
                     fs.readFile(path.join(artistspath, file), function (err, data) {
@@ -142,15 +146,21 @@ function populateDB() {
                                 console.log("Created artist entries for " + file);
                             }).catch(function (error) {
                             console.log("error: " + error);
+
                         })
                     })
                 });
             });
 
+
             // bulk create all works
             const works = context.models.works;
             const workspath = path.join(__dirname, "scrapedoutput", "works")
             fs.readdir(workspath, (err, files) => {
+              if (err) {
+                        console.log(err);
+                        return;
+                    }
                 files.forEach(file => {
                     //for each file, read  it and do bulk create
                     fs.readFile(path.join(workspath, file), function (err, data) {
@@ -159,15 +169,23 @@ function populateDB() {
                                 console.log("Created work entries for " + file);
                             }).catch(function (error) {
                             console.log("error: " + error);
-                        })
+
+                            })
+
+                        
                     })
                 });
             });
+
 
             // bulk create all releases
             const releases = context.models.releases;
             const releasespath = path.join(__dirname, "scrapedoutput", "releases")
             fs.readdir(releasespath, (err, files) => {
+              if (err) {
+                        console.log(err);
+                        return;
+                    }
                 files.forEach(file => {
                     //for each file, read  it and do bulk create
                     fs.readFile(path.join(releasespath, file), function (err, data) {
@@ -176,6 +194,9 @@ function populateDB() {
                                 console.log("Created release entries for " + file);
                             }).catch(function (error) {
                             console.log("error: " + error);
+
+                
+                
                         })
                     })
                 });
