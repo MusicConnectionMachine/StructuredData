@@ -100,7 +100,7 @@ module.exports = function (returnToMaster) {
                 tags: scrapedData.tags,
                 wiki_link: scrapedData.wiki_link,
                 wiki_pageid: scrapedData.wiki_pageid
-            })
+            });
         })
     }
 }
