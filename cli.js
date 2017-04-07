@@ -51,10 +51,8 @@ if (cluster.isMaster) {
     }
     if (script == "test") {
         console.log("Adding test scripts");
-        scriptsArray.push("./testscripts/test.js",
-            "./testscripts/test2.js",
-            "./testscripts/test3.js",
-            "./testscripts/dbpedia_musicians_nationality.js"
+        scriptsArray.push(
+            "./testscripts/dbpedia_one_musician.js"
         );
     }
 
@@ -141,12 +139,8 @@ function populateDB() {
                 files.forEach(file => {
                     //for each file, read  it and do bulk create
                     fs.readFile(path.join(artistspath, file), function (err, data) {
-                        artists.bulkCreate(JSON.parse(data))
-                            .then(function () {
-                                console.log("Created artist entries for " + file);
-                            }).catch(function (error) {
-                            console.log("error: " + error);
-                        })
+                        var jsonData = JSON.parse(data);
+                        populateArtists(context, jsonData);
                     })
                 });
             });
@@ -163,12 +157,8 @@ function populateDB() {
                 files.forEach(file => {
                     //for each file, read  it and do bulk create
                     fs.readFile(path.join(workspath, file), function (err, data) {
-                        works.bulkCreate(JSON.parse(data))
-                            .then(function () {
-                                console.log("Created work entries for " + file);
-                            }).catch(function (error) {
-                            console.log("error: " + error);
-                        })
+                        var jsonData = JSON.parse(data);
+                        populateWorks(context, jsonData);
                     })
                 });
             });
@@ -185,12 +175,8 @@ function populateDB() {
                 files.forEach(file => {
                     //for each file, read  it and do bulk create
                     fs.readFile(path.join(releasespath, file), function (err, data) {
-                        releases.bulkCreate(JSON.parse(data))
-                            .then(function () {
-                                console.log("Created release entries for " + file);
-                            }).catch(function (error) {
-                            console.log("error: " + error);
-                        })
+                        var jsonData = JSON.parse(data);
+                        populateReleases(context, jsonData);
                     })
                 });
             });
@@ -206,4 +192,66 @@ function populateDB() {
     });
 
 
+}
+function populateArtists(context, jsonData) {
+    const artists = context.models.artists;
+    const entities = context.models.entities;
+    jsonData.forEach(artist => {
+        entities.create().then(function (entity) {
+            artists.create({
+                name: artist.name,
+                nationality: artist.nationality,
+                dateOfBirth: artist.dateOfBirth,
+                dateOfDeath: artist.dateOfDeath,
+                placeOfBirth: artist.placeOfBirth,
+                placeOfDeath: artist.placeOfDeath,
+                instrument: artist.instrument,
+                psuedonym: artist.psuedonym,
+                work: artist.work,
+                release: artist.release,
+                tags: artist.tag,
+                source_link: artist.source_link,
+                wiki_link: artist.wiki_link,
+                wiki_pageid: artist.wiki_pageid,
+                entityId: entity.id
+            });
+        }).catch(function (error) {
+            console.log("Error while creating artist " + artist.name + ": " + error);
+        });
+    })
+}
+
+function populateWorks(context, jsonData) {
+    const works = context.models.works;
+    const entities = context.models.entities;
+    jsonData.forEach(work => {
+        entities.create().then(function (entity) {
+            works.create({
+                title: work.title,
+                compositionyear: work.compositionyear,
+                entityId: entity.id
+            });
+        }).catch(function (error) {
+            console.log("Error while creating work " + work.title + ": " + error);
+        });
+    })
+}
+
+function populateReleases(context, jsonData) {
+    const releases = context.models.releases;
+    const entities = context.models.entities;
+    jsonData.forEach(release => {
+        entities.create().then(function (entity) {
+            releases.create({
+                title: release.title,
+                format: release.format,
+                date: release.date,
+                country: release.country,
+                label: release.label,
+                entityId: entity.id
+            });
+        }).catch(function (error) {
+            console.log("Error while creating release " + release.title + ": " + error);
+        });
+    })
 }
