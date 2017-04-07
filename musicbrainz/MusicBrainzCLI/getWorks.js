@@ -1,74 +1,59 @@
 var request = require("request");
 var fs = require('fs');
-var intervalId2 = null;
 
-var newObj2 = {};
-var worksAPI = [];
 
 module.exports = {
-  getWorks: function(finalArray) {
+    getWorks: function (finalArray, returnToServerJS) {
 
-    var elemNum = 0;
+        var elemNum = 0;
+        var worksAPI = [];
+        var artists = [];
 
-    var newObj = {
-        table: []
-    };
+        var intervalId2 = setInterval(function () {
+            var url = "http://musicbrainz.org/ws/2/work/?query=arid:" + finalArray[elemNum] + "&fmt=json";
+            console.log('request works for artist ' + finalArray[elemNum]);
 
- intervalId2 = setInterval(function () {
+            request({
+                url: url,
+                headers: {
+                    'User-Agent': 'ClassicalMusicApp/1.3.0 '
+                },
+                json: true
+            }, function (error, response, body) {
 
-        if (elemNum == 5) {
+                var json = body;
 
-            clearInterval(intervalId2);
+                artists.push({artistId: finalArray[elemNum], count: json.count, works: json.works});
+                elemNum = elemNum + 1;
+                if (elemNum == finalArray.length) {
 
-            obj = newObj;
+                    clearInterval(intervalId2);
 
-            for(i = 0; i < obj.table.length; i++) {
-            var counter = obj.table[i].count;
-                for(j = 0; j < counter; j++) {
-                    newObj2 = {};
-                    if (obj.table[i].works[j] != null) {
-                        newObj2.title = obj.table[i].works[j].title;
-                        worksAPI.push(newObj2);
-                    }     
-                }    
-            }
-
-            json2 = JSON.stringify(worksAPI); //convert it back to json
-            fs.writeFile('./scrapedoutput/BrainzWorksSequelize.json', json2, 'utf8', function writeFileCallback(err, data) {
-                process.send("done from works");
-                process.exit();
-            }); // write it back
-
-
-        }
-
-        var url = "http://musicbrainz.org/ws/2/work/?query=arid:" + finalArray[elemNum] + "&fmt=json";
-
-        console.log(url);
-
-        console.log('request Work started!');
-
-        request({
-            url: url,
-            headers: {
-                'User-Agent': 'ClassicalMusicApp/1.3.0 '
-            },
-            json: true
-        }, function (error, response, body) {
-
-            var json = body;
-
-            newObj.table.push({artistId: finalArray[elemNum], count: json.count, works: json.works});
-            elemNum = elemNum + 1;
-
-        });
-
-
-    }, 1500)
-
-
-  },
-       
+                    for (i = 0; i < artists.length; i++) {
+                        var counter = artists[i].count;
+                        for (j = 0; j < counter; j++) {
+                            var artistId;
+                            if (artists[i].works[j] != null) {
+                                artists[i].works[j].relations.forEach(function (relation) {
+                                    if (relation.type == "composer") {
+                                        artistId = relation.artist.id;
+                                    }
+                                });
+                                worksAPI.push({
+                                    title: artists[i].works[j].title,
+                                    artistId: artistId
+                                });
+                            }
+                        }
+                    }
+                    json2 = JSON.stringify(worksAPI); //convert it back to json
+                    fs.writeFile('./scrapedoutput/works/BrainzWorksSequelize.json', json2, 'utf8', function writeFileCallback(err, data) {
+                        returnToServerJS();
+                    }); // write it back
+                }
+            });
+        }, 3000)
+    },
 };
 
 
