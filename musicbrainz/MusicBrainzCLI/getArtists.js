@@ -26,7 +26,7 @@ module.exports = {
 
                 for (i = 0; i < obj.table.length; i++) {
                     if (obj.table[i].hasOwnProperty("aboutartist")) {
-                        var newObj3 = {
+                        var artistObject = {
                             nationality: null,
                             dateOfBirth: null,
                             dateOfDeath: null,
@@ -39,31 +39,31 @@ module.exports = {
                             tag: null
                         };
                         var aboutArtist = obj.table[i].aboutartist;
-                        newObj3.name = aboutArtist.name;
-                        newObj3.source_link = "https://musicbrainz.org/artist/" + obj.table[i].artistId;
+                        artistObject.name = aboutArtist.name;
+                        artistObject.source_link = "https://musicbrainz.org/artist/" + obj.table[i].artistId;
 
                         if (aboutArtist.hasOwnProperty("life-span")) {
                             if (aboutArtist["life-span"].hasOwnProperty("begin") && aboutArtist["life-span"].begin != null) {
-                                newObj3.dateOfBirth = aboutArtist["life-span"].begin;
+                                artistObject.dateOfBirth = aboutArtist["life-span"].begin;
                             }
                             if (aboutArtist["life-span"].hasOwnProperty("end") && aboutArtist["life-span"].end != null) {
-                                newObj3.dateOfDeath = aboutArtist["life-span"].end;
+                                artistObject.dateOfDeath = aboutArtist["life-span"].end;
                             }
                         }
 
                         if (aboutArtist.hasOwnProperty("area") && aboutArtist.area != null) {
-                            newObj3.nationality = aboutArtist.area.name;
+                            artistObject.nationality = aboutArtist.area.name;
                         }
 
                         if (aboutArtist.hasOwnProperty("begin_area") && aboutArtist.begin_area != null) {
-                            newObj3.placeOfBirth = aboutArtist.begin_area.name;
+                            artistObject.placeOfBirth = aboutArtist.begin_area.name;
                         }
 
                         if (aboutArtist.hasOwnProperty("end_area") && aboutArtist.end_area != null) {
-                            newObj3.placeOfDeath = aboutArtist.end_area.name;
+                            artistObject.placeOfDeath = aboutArtist.end_area.name;
                         }
-                        console.log("adding " + newObj3.name);
-                        artistsAPI.push(newObj3);
+                        console.log("adding " + artistObject.name);
+                        artistsAPI.push(artistObject);
                     }
                 }
                 console.log("write to output file ");
