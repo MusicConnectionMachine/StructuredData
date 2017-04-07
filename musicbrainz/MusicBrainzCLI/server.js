@@ -3,7 +3,7 @@ var fs = require('fs');
 var getReleases = require("./getReleases.js");
 var getWorks = require("./getWorks.js");
 var getArtists = require("./getArtists.js");
-var intervalId = null;
+
 
 var obj = {
     table: []
@@ -12,23 +12,8 @@ var obj = {
 var date = 1620;
 
 
-
-intervalId = setInterval(function () {
+var intervalId = setInterval(function () {
     // once all requests for the year 1620 until 1820 are executed, convert the outputobject into json and write it to file
-    if (date == 1623) {
-
-        clearInterval(intervalId);
-            
-        arrayofObj = obj.table;
-        var finalArray = arrayofObj.map(function (artistai) {
-            return artistai.id;
-        });
-
-        getReleases.getReleases(finalArray);
-        getWorks.getWorks(finalArray);
-        getArtists.getArtists(finalArray);
-
-    }
 
     var url = "http://musicbrainz.org/ws/2/artist/?query=begin:" + date + "&fmt=json";
 
@@ -62,7 +47,36 @@ intervalId = setInterval(function () {
             }
         }
         date = date + 1;
+        if (date == 1821) {
 
+            clearInterval(intervalId);
+
+            arrayofObj = obj.table;
+            var finalArray = arrayofObj.map(function (artistai) {
+                return artistai.id;
+            });
+
+            var finishedscrapers = 0;
+            getReleases.getReleases(finalArray, function () {
+                finishedscrapers++;
+                if (finishedscrapers === 3) {
+                    console.log("finished scraping musicbrainz")
+                }
+            });
+            getWorks.getWorks(finalArray, function () {
+                finishedscrapers++;
+                if (finishedscrapers === 3) {
+                    console.log("finished scraping musicbrainz")
+                }
+            });
+            getArtists.getArtists(finalArray, function () {
+                finishedscrapers++;
+                if (finishedscrapers === 3) {
+                    console.log("finished scraping musicbrainz")
+                }
+            });
+
+        }
     });
 
 

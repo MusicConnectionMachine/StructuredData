@@ -1,21 +1,16 @@
 var request = require("request");
 var fs = require('fs');
 
-var releasesAPI = [];
 
 module.exports = {
     getReleases: function (finalArray, returnToServerJS) {
 
         var elemNum = 0;
-
+        var releasesAPI = [];
         var artists = [];
 
         var intervalId2 = setInterval(function () {
-
-
             var url = "http://musicbrainz.org/ws/2/release/?query=arid:" + finalArray[elemNum] + "&fmt=json";
-
-
             console.log('request releases for artist ' + finalArray[elemNum]);
 
             request({
@@ -32,7 +27,6 @@ module.exports = {
                 if (elemNum == finalArray.length) {
 
                     clearInterval(intervalId2);
-
 
                     for (i = 0; i < artists.length; i++) {
                         var counter = artists[i].count;
@@ -61,14 +55,9 @@ module.exports = {
                         returnToServerJS();
                     }); // write it back
                 }
-
             });
-
-        }, 1500)
-
-
+        }, 3000)
     },
-
 };
 
 
