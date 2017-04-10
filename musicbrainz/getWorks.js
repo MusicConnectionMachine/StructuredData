@@ -40,7 +40,8 @@ module.exports = {
                         for (j = 0; j < counter; j++) {
                             var artistId;
                             if (artists[i].works[j] != null) {
-                                artists[i].works[j].relations.forEach(function (relation) {
+                                var relations = artists[i].works[j].relations;
+                                relations.forEach(function (relation) {
                                     if (relation.type == "composer") {
                                         artistId = relation.artist.id;
                                     }
