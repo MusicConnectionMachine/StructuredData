@@ -40,12 +40,15 @@ module.exports = {
                         for (j = 0; j < counter; j++) {
                             var releaseObject = {};
                             if (artists[i].releases[j] != null) {
-                                var currReleases = artists[i].releases[j]
-                                releaseObject.title = artists[i].releases[j].title;
-                                releaseObject.format = artists[i].releases[j].media[0].format;
-                                releaseObject.date = artists[i].releases[j].date;
-                                releaseObject.country = artists[i].releases[j]["label-info"][0].label.name;
-                                releaseObject.label = artists[i].releases[j].title;
+                                var currReleases = artists[i].releases[j];
+                                if (currReleases.date) {
+                                    if (/^\d{4}$/.test(currReleases.date)) {
+                                        currReleases.date = currReleases.date + "-01-01"
+                                    }
+                                    if (/^\d{4}-\d{2}$/.test(currReleases.date)) {
+                                        currReleases.date = currReleases.date + "-01"
+                                    }
+                                }
                                 releasesAPI.push({
                                     title: currReleases.title,
                                     format: currReleases.media[0].format,

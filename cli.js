@@ -34,14 +34,7 @@ if (cluster.isMaster) {
     }
     if (script == "musicbrainz") {
         console.log("Adding musicbrainz scripts");
-        scriptsArray.push("./musicbrainz/scrapeArtists/server.js",
-            "./musicbrainz/scrapeRecordings/server.js",
-            "./musicbrainz/scrapeReleases/server.js",
-            "./musicbrainz/scrapeWorks/server.js",
-            "./musicbrainz/scrapeIDArtists/server.js",
-            "./musicbrainz/RecordingsArtistsID/app.js",
-            "./musicbrainz/DataForSequelizeAPI/app2.js",
-            "./musicbrainz/PutJSONTogether/app.js"
+        scriptsArray.push("./musicbrainz/server.js"
         );
     }
     if (script == "allmusic") {
@@ -193,11 +186,11 @@ function populateDB() {
 
 
 }
-function populateArtists(context, jsonData) {
+function populateArtists(context, artistsOutput) {
     const artists = context.models.artists;
     const entities = context.models.entities;
-    jsonData.forEach(artist => {
-        entities.create().then(function (entity) {
+    artistsOutput.forEach(artist => {
+        entities.create().then(entity => {
             artists.create({
                 name: artist.name,
                 nationality: artist.nationality,
@@ -221,27 +214,26 @@ function populateArtists(context, jsonData) {
     })
 }
 
-function populateWorks(context, jsonData) {
+function populateWorks(context, worksOutput) {
     const works = context.models.works;
     const entities = context.models.entities;
-    jsonData.forEach(work => {
-        entities.create().then(function (entity) {
+    worksOutput.forEach(work => {
+        entities.create().then(entity => {
             works.create({
                 title: work.title,
-                compositionyear: work.compositionyear,
                 entityId: entity.id
-            });
+            })
         }).catch(function (error) {
             console.log("Error while creating work " + work.title + ": " + error);
         });
     })
 }
 
-function populateReleases(context, jsonData) {
+function populateReleases(context, releasesOutput) {
     const releases = context.models.releases;
     const entities = context.models.entities;
-    jsonData.forEach(release => {
-        entities.create().then(function (entity) {
+    releasesOutput.forEach(release => {
+        entities.create().then(entity => {
             releases.create({
                 title: release.title,
                 format: release.format,
