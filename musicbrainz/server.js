@@ -47,7 +47,7 @@ var intervalId = setInterval(function () {
             }
         }
         date = date + 1;
-        if (date == 1821) {
+        if (date == 1622) {
 
             clearInterval(intervalId);
 
