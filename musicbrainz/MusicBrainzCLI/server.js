@@ -80,4 +80,4 @@ var intervalId = setInterval(function () {
     });
 
 
-}, 3000)
+}, 1500)

@@ -6,6 +6,7 @@ module.exports = {
     getReleases: function (finalArray, returnToServerJS) {
 
         var elemNum = 0;
+        var requestCounter = 0;
         var releasesAPI = [];
         var artists = [];
 
@@ -20,14 +21,20 @@ module.exports = {
                 },
                 json: true
             }, function (error, response, body) {
+                requestCounter++;
+                if (error) {
+                    console.log("getReleases request error: " + error);
+                }
+                if (body && body.error) {
+                    console.log("getReleases body error: " + body.error);
+                }
+                if (body && !body.error) {
+                    var json = body;
+                    artists.push({artistId: finalArray[elemNum], count: json.count, releases: json.releases});
+                }
 
-                var json = body;
-                artists.push({artistId: finalArray[elemNum], count: json.count, releases: json.releases});
-                elemNum = elemNum + 1;
-                if (elemNum == finalArray.length) {
-
-                    clearInterval(intervalId2);
-
+                if (requestCounter == finalArray.length) {
+                    console.log("finished scraping releases")
                     for (i = 0; i < artists.length; i++) {
                         var counter = artists[i].count;
                         for (j = 0; j < counter; j++) {
@@ -45,17 +52,22 @@ module.exports = {
                                     date: currReleases.date,
                                     country: currReleases.country,
                                     label: currReleases["label-info"][0].label.name,
-                                    artistId: artists[i].artistId
+                                    musicbrainzArtistId: artists[i].artistId
                                 });
                             }
                         }
                     }
                     json2 = JSON.stringify(releasesAPI); //convert it back to json
                     fs.writeFile('./scrapedoutput/releases/BrainzReleasesSequelize.json', json2, 'utf8', function writeFileCallback(err, data) {
+                        console.log("finished writing releases")
                         returnToServerJS();
                     }); // write it back
                 }
             });
+            elemNum = elemNum + 1;
+            if (elemNum == finalArray.length) {
+                clearInterval(intervalId2);
+            }
         }, 3000)
     },
 };
