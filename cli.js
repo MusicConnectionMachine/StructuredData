@@ -252,6 +252,7 @@ function populateReleases(context, releasesData, artistsData, callback) {
 }
 
 function populateArtists(context, artistsOutput, callback) {
+
     const artists = context.models.artists;
     const entities = context.models.entities;
     artistsOutput.forEach(artist => {
@@ -299,6 +300,7 @@ function populateArtists(context, artistsOutput, callback) {
     });
     callback();
 }
+
 
 
 function dbpediaPopulateArtists(context) {
@@ -353,13 +355,50 @@ function connectArtistToReleases(context, createdArtist, release) {
                 }).then(createdRelease => {
                     createdArtist.addReleases(createdRelease);
                 })
+              
             });
         }
         else {
             createdArtist.addReleases(queriedRelease);
         }
     });
+
 }
+
+function populateWorks(context, worksOutput) {
+    const works = context.models.works;
+    const entities = context.models.entities;
+    worksOutput.forEach(work => {
+        entities.create().then(entity => {
+            works.create({
+                title: work.title,
+                entityId: entity.id
+            })
+        }).catch(function (error) {
+            console.log("Error while creating work " + work.title + ": " + error);
+        });
+    })
+}
+
+function populateReleases(context, releasesOutput) {
+    const releases = context.models.releases;
+    const entities = context.models.entities;
+    releasesOutput.forEach(release => {
+        entities.create().then(entity => {
+            releases.create({
+                title: release.title,
+                format: release.format,
+                date: release.date,
+                country: release.country,
+                label: release.label,
+                entityId: entity.id
+              })
+        }).catch(function (error) {
+            console.log("Error while creating work " + work.title + ": " + error);
+        });
+    })
+}
+
 
 function connectArtistToInstruments(context, createdArtist, instrument) {
     const instruments = context.models.instruments;
