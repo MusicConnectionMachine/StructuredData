@@ -1,1 +1,0 @@
-Scrape artists' information that participated in the recordings from composers (who were born between 1620-1820) from Muiscbrainz library
