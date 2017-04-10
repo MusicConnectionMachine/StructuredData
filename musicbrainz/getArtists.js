@@ -1,7 +1,6 @@
 var request = require("request");
 var fs = require('fs');
 var cheerio = require('cheerio');
-var sleep = require('system-sleep')
 
 
 module.exports = {
@@ -115,17 +114,17 @@ module.exports = {
                             placeOfBirth: placeOfBirth,
                             placeOfDeath: placeOfDeath,
                             instrument: null,
-                            psuedonym: pseudonym,
+                            pseudonym: pseudonym,
                             work: null,
                             release: null,
-                            tag: tags,
+                            tags: tags,
                             source_link: source_link,
                             musicbrainzArtistId: aboutArtist.id
                         });
 
                     }
                     json2 = JSON.stringify(artistsAPI); //convert it back to json
-                    fs.writeFile('./scrapedoutput/artists/BrainzArtistsSequelize.json', json2, 'utf8', function writeFileCallback(err, data) {
+                    fs.writeFile('./scrapedoutput/musicbrainz/ArtistsMusicBrainz.json', json2, 'utf8', function writeFileCallback(err, data) {
                         console.log("finished writing artists")
                         returnToServerJS();
                     }); // write it back

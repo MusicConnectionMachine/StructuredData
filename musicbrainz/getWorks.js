@@ -55,7 +55,7 @@ module.exports = {
                         }
                     }
                     json2 = JSON.stringify(worksAPI); //convert it back to json
-                    fs.writeFile('./scrapedoutput/works/BrainzWorksSequelize.json', json2, 'utf8', function writeFileCallback(err, data) {
+                    fs.writeFile('./scrapedoutput/musicbrainz/WorksMusicBrainz.json', json2, 'utf8', function writeFileCallback(err, data) {
                         console.log("finished writing works")
                         returnToServerJS();
                     }); // write it back
