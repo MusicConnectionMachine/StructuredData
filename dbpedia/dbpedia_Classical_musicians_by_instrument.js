@@ -6,6 +6,9 @@ module.exports = function (returnToMaster) {
     var cheerio = require('cheerio');
     var jsesc = require('jsesc');
     const replaceURLAndUnderscore = require('./helper/replaceURLAndUnderscore');
+
+    const outputFile = './scrapedoutput/dbpedia/dbpedia_Classical_musicians_by_instruments.json';
+
     var temp_list = [],
         source_link = [],
         musicians = [],
@@ -40,7 +43,7 @@ module.exports = function (returnToMaster) {
                 sleep(1000);
             });
             json2 = JSON.stringify(musicians); //convert it back to json
-            fs.writeFileSync('./scrapedoutput/artists/dbpedia_Classical_musicians_by_instruments.json', json2, 'utf8'); // write it back
+            fs.writeFileSync(outputFile, json2, 'utf8'); // write it back
             returnToMaster();
 
 

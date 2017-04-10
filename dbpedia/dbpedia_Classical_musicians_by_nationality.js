@@ -7,7 +7,7 @@ module.exports = function (returnToMaster) {
     const replaceURLAndUnderscore = require('./helper/replaceURLAndUnderscore');
     const url = "http://dbpedia.org/page/Category:Classical_musicians_by_nationality";
 
-    const outputFile = "./scrapedoutput/artists/dbpedia_Classical_musicians_by_nationality.json";
+    const outputFile = "./scrapedoutput/dbpedia/dbpedia_Classical_musicians_by_nationality.json";
     console.log("---dbpedia_Classical_musicians_by_nationality.js started!---")
     var musicians = [];
 
