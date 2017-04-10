@@ -1,83 +1,99 @@
-var request = require("request");
-var fs = require('fs');
-var getReleases = require("./getReleases.js");
-var getWorks = require("./getWorks.js");
-var getArtists = require("./getArtists.js");
+module.exports = function (returnToMaster) {
+    var request = require("request");
+    var fs = require('fs');
+    var getReleases = require("./getReleases.js");
+    var getWorks = require("./getWorks.js");
+    var getArtists = require("./getArtists.js");
 
 
-var obj = {
-    table: []
-};
+    var artistIDs = [];
 
-var date = 1620;
+    var queryBegin = 1620;
+    var queryEnd = 1820;
 
 
-var intervalId = setInterval(function () {
-    // once all requests for the year 1620 until 1820 are executed, convert the outputobject into json and write it to file
+    var queryCounter = queryBegin;
+    var requestCounter = queryBegin;
 
-    var url = "http://musicbrainz.org/ws/2/artist/?query=begin:" + date + "&fmt=json";
+    var intervalId = setInterval(function () {
 
-    console.log("requesting: " + url);
+        var url = "http://musicbrainz.org/ws/2/artist/?query=begin:" + queryCounter + "&fmt=json";
 
-    request({
-        url: url,
-        headers: {
-            'User-Agent': 'ClassicalMusic/1.5.0 '
-        },
-        json: true
-    }, function (error, response, body) {
+        console.log("requesting: " + url);
 
-        var json = body;
-        var counter = json.count;
-        console.log("number of artists born in " + date + ": " + counter);
-
-        if (counter > 0) {
-
-            // iterate through all entries and push them to the array obj.table
-            for (var z = 0; z < counter; z++) {
-                artist = json.artists[z];
-
-                obj.table.push({
-                    id: artist.id,
-                    type: artist.type,
-                    name: artist.name,
-                    country: artist.country,
-                    date: date
-                });
+        request({
+            url: url,
+            headers: {
+                'User-Agent': 'ClassicalMusic/1.5.0 '
+            },
+            json: true
+        }, function (error, response, body) {
+            requestCounter++;
+            if (error) {
+                console.log("getArtists request error: " + error);
             }
-        }
-        date = date + 1;
-        if (date == 1622) {
+            if (body && body.error) {
+                console.log("getArtists body error: " + body.error);
+            }
+            if (body && !body.error) {
+                var json = body;
+                var counter = json.count;
+                console.log("number of artists born in " + (requestCounter - 1) + ": " + counter);
 
+                if (counter > 0) {
+
+                    // iterate through all entries and push them to the array obj.table
+                    for (var z = 0; z < counter; z++) {
+                        artistIDs.push({
+                            id: json.artists[z].id
+                        });
+                    }
+                }
+            }
+
+            if (requestCounter == queryEnd) {
+                fs.writeFile('./scrapedoutput/artists/BrainzArtistsSequelize.json', JSON.stringify(artistIDs), 'utf8', function writeFileCallback(err, data) {
+                    console.log("musicbrainz finished writing artists")
+                }); // write it back
+
+
+                var finalArray = artistIDs.map(function (artistai) {
+                    return artistai.id;
+                });
+
+                var finishedscrapers = 0;
+                getArtists.getArtists(finalArray, function () {
+                    finishedscrapers++;
+                    if (finishedscrapers === 3) {
+                        console.log("musicbrainz finished writing artists");
+                        returnToMaster();
+                    }
+                });
+                getReleases.getReleases(finalArray, function () {
+                    console.log("musicbrainz finished writing releases");
+                    finishedscrapers++;
+                    if (finishedscrapers === 3) {
+                        returnToMaster();
+                    }
+                });
+                getWorks.getWorks(finalArray, function () {
+                    console.log("musicbrainz finished writing works");
+                    finishedscrapers++;
+                    if (finishedscrapers === 3) {
+                        returnToMaster();
+                    }
+                });
+
+
+            }
+        });
+        queryCounter = queryCounter + 1;
+        if (queryCounter == queryEnd) {
             clearInterval(intervalId);
 
-            arrayofObj = obj.table;
-            var finalArray = arrayofObj.map(function (artistai) {
-                return artistai.id;
-            });
-
-            var finishedscrapers = 0;
-            getReleases.getReleases(finalArray, function () {
-                finishedscrapers++;
-                if (finishedscrapers === 3) {
-                    console.log("finished scraping musicbrainz")
-                }
-            });
-            getWorks.getWorks(finalArray, function () {
-                finishedscrapers++;
-                if (finishedscrapers === 3) {
-                    console.log("finished scraping musicbrainz")
-                }
-            });
-            getArtists.getArtists(finalArray, function () {
-                finishedscrapers++;
-                if (finishedscrapers === 3) {
-                    console.log("finished scraping musicbrainz")
-                }
-            });
-
         }
-    });
 
 
-}, 1500)
+    }, 1500)
+};
+

@@ -1,7 +1,6 @@
 var request = require("request");
 var fs = require('fs');
 var cheerio = require('cheerio');
-var sleep = require('system-sleep')
 
 
 module.exports = {
@@ -38,10 +37,6 @@ module.exports = {
                 }
 
                 if (requestCounter == finalArray.length) {
-                    console.log("finished scraping artists")
-                    json2 = JSON.stringify(artists); //convert it back to json
-                    fs.writeFileSync('./scrapedoutput/artists/test123.json', json2, 'utf8');
-
 
                     for (i = 0; i < artists.length; i++) {
 
@@ -58,6 +53,22 @@ module.exports = {
                                 dateOfDeath = aboutArtist["life-span"].end;
                             }
                         }
+
+                        //add day and month to year, otherwise Sequelize fails with "invalid input syntax for type date"
+                        if (/^\d{4}$/.test(dateOfBirth)) {
+                            dateOfBirth = dateOfBirth + "-01-01"
+                        }
+                        if (/^\d{4}$/.test(dateOfDeath)) {
+                            dateOfDeath = dateOfDeath + "-01-01"
+                        }
+                        if (/^\d{4}-\d{2}$/.test(dateOfBirth)) {
+                            dateOfBirth = dateOfBirth + "-01"
+                        }
+                        if (/^\d{4}-\d{2}$/.test(dateOfDeath)) {
+                            dateOfDeath = dateOfDeath + "-01"
+                        }
+
+
                         var nationality;
                         if (aboutArtist.hasOwnProperty("area") && aboutArtist.area != null) {
                             nationality = aboutArtist.area.name;
@@ -71,26 +82,49 @@ module.exports = {
                             placeOfDeath = aboutArtist.end_area.name;
                         }
 
+                        var pseudonym = [];
+                        if (aboutArtist.hasOwnProperty("aliases") && aboutArtist.aliases != null) {
+                            aboutArtist.aliases.forEach(function (alias) {
+                                pseudonym.push(alias.name);
+                            });
+                        }
+
+                        var tags = [];
+                        var artist_type = null;
+                        if (aboutArtist.hasOwnProperty("tags") && aboutArtist.tags != null) {
+                            aboutArtist.tags.forEach(function (tag) {
+                                if (tag.name != "to clean up") {
+                                    tags.push(tag.name);
+                                    if (tag.name == "composer") {
+                                        artist_type = "composer";
+                                    }
+                                }
+
+                            });
+                        }
+                        var work, release, instrument = [];
+
+
                         artistsAPI.push({
                             name: name,
+                            artist_type: artist_type,
                             nationality: nationality,
                             dateOfBirth: dateOfBirth,
                             dateOfDeath: dateOfDeath,
                             placeOfBirth: placeOfBirth,
                             placeOfDeath: placeOfDeath,
                             instrument: null,
-                            psuedonym: null,
+                            pseudonym: pseudonym,
                             work: null,
                             release: null,
-                            tag: null,
+                            tags: tags,
                             source_link: source_link,
                             musicbrainzArtistId: aboutArtist.id
                         });
 
-
                     }
                     json2 = JSON.stringify(artistsAPI); //convert it back to json
-                    fs.writeFile('./scrapedoutput/artists/BrainzArtistsSequelize.json', json2, 'utf8', function writeFileCallback(err, data) {
+                    fs.writeFile('./scrapedoutput/musicbrainz/ArtistsMusicBrainz.json', json2, 'utf8', function writeFileCallback(err, data) {
                         console.log("finished writing artists")
                         returnToServerJS();
                     }); // write it back

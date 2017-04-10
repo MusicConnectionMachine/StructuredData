@@ -39,22 +39,23 @@ module.exports = {
                         var counter = artists[i].count;
                         for (j = 0; j < counter; j++) {
                             var artistId;
-                            if (artists[i].works[j] != null) {
-                                var relations = artists[i].works[j].relations;
+                            var works = artists[i].works[j];
+                            if (works != null) {
+                                var relations = works.relations;
                                 relations.forEach(function (relation) {
                                     if (relation.type == "composer") {
                                         artistId = relation.artist.id;
                                     }
                                 });
                                 worksAPI.push({
-                                    title: artists[i].works[j].title,
-                                    musicbrainzArtistId: artistId
+                                    title: works.title,
+                                    composer: artistId
                                 });
                             }
                         }
                     }
                     json2 = JSON.stringify(worksAPI); //convert it back to json
-                    fs.writeFile('./scrapedoutput/works/BrainzWorksSequelize.json', json2, 'utf8', function writeFileCallback(err, data) {
+                    fs.writeFile('./scrapedoutput/musicbrainz/WorksMusicBrainz.json', json2, 'utf8', function writeFileCallback(err, data) {
                         console.log("finished writing works")
                         returnToServerJS();
                     }); // write it back
