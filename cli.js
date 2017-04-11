@@ -3,6 +3,7 @@ const path = require('path');
 const fs = require('fs');
 const cluster = require('cluster');
 var scriptsArray = [];
+var scriptsInput = [];
 const availableScripts = ["dbpedia", "worldcat", "musicbrainz", "allmusic"]
 var postgresCS;
 if (cluster.isMaster) {
@@ -14,10 +15,10 @@ if (cluster.isMaster) {
         .action(function (scripts) {
             scripts.forEach(function (script) {
                 if (script == "all") {
-                    scriptsArray = availableScripts
+                    scriptsInput = availableScripts
                 }
                 else if (availableScripts.includes(script) || script == "test") {
-                    scriptsArray.push(script);
+                    scriptsInput.push(script);
                 }
                 else {
                     console.log("invalid scriptsArray argument: " + script)
@@ -26,11 +27,11 @@ if (cluster.isMaster) {
         })
         .parse(process.argv);
 
-    if(scriptsArray.length === 0 ){
-        scriptsArray=process.env.s;
+    if (scriptsInput.length === 0) {
+        scriptsInput = process.env.s;
     }
 
-    if(!scriptsArray){
+    if (!scriptsInput) {
         console.log("No scripts specified. Aborting...")
         process.exit();
     }
@@ -38,7 +39,7 @@ if (cluster.isMaster) {
     postgresCS = commander.database || process.env.d;
 
 
-    if (scriptsArray.includes("dbpedia")) {
+    if (scriptsInput.includes("dbpedia")) {
         console.log("Adding dbpedia scripts");
         scriptsArray.push("./dbpedia/dbpedia_Classical_musicians_by_century.js",
             "./dbpedia/dbpedia_Classical_musicians_by_instrument.js",
@@ -48,22 +49,22 @@ if (cluster.isMaster) {
         );
 
     }
-    if (scriptsArray.includes("worldcat")) {
+    if (scriptsInput.includes("worldcat")) {
         console.log("Adding worldcat scripts");
-        scriptsArray.push("./worldcat/worldcat.js"
+        scriptsArray.push("./WorldCat/worldcat.js"
         );
     }
-    if (scriptsArray.includes("musicbrainz")) {
+    if (scriptsInput.includes("musicbrainz")) {
         console.log("Adding musicbrainz scripts");
         scriptsArray.push("./musicbrainz/server.js"
         );
     }
-    if (scriptsArray.includes("allmusic")) {
+    if (scriptsInput.includes("allmusic")) {
         console.log("Adding almusic scripts");
         scriptsArray.push("./allmusic/allMusicScript.js"
         );
     }
-    if (scriptsArray.includes("test")) {
+    if (scriptsInput.includes("test")) {
         console.log("Adding test scripts");
         scriptsArray.push(
             "./testscripts/empty.js"
