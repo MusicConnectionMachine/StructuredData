@@ -3,21 +3,42 @@ const path = require('path');
 const fs = require('fs');
 const cluster = require('cluster');
 var scriptsArray = [];
-var script, postgresCS;
+const availableScripts = ["dbpedia", "worldcat", "musicbrainz", "allmusic"]
+var postgresCS;
 if (cluster.isMaster) {
 
     commander
-        .option('-s, --script [script]', 'Define the scripts that should be executed', /^(dbpedia|worldcat|musicbrainz|allmusic|test)$/i)
-        .option('-d, --database [database] ', 'Set the connection string to connect to the database.')
-        .option('-t, --threads [threads] ', 'Set the amount of worker threads that should be spawned.')
+        .option('-d, --database <database> ', 'Set the connection string to connect to the database.')
+        .option('-t, --threads <threads> ', 'Set the amount of worker threads that should be spawned.')
+        .arguments('[scripts...] ', /^(dbpedia|worldcat|musicbrainz|allmusic|test)$/i)
+        .action(function (scripts) {
+            scripts.forEach(function (script) {
+                if (script == "all") {
+                    scriptsArray = availableScripts
+                }
+                else if (availableScripts.includes(script) || script == "test") {
+                    scriptsArray.push(script);
+                }
+                else {
+                    console.log("invalid scriptsArray argument: " + script)
+                }
+            })
+        })
         .parse(process.argv);
 
-    script = commander.script || process.env.s;
+    if(scriptsArray.length === 0 ){
+        scriptsArray=process.env.s;
+    }
+
+    if(!scriptsArray){
+        console.log("No scripts specified. Aborting...")
+        process.exit();
+    }
 
     postgresCS = commander.database || process.env.d;
 
 
-    if (script == "dbpedia") {
+    if (scriptsArray.includes("dbpedia")) {
         console.log("Adding dbpedia scripts");
         scriptsArray.push("./dbpedia/dbpedia_Classical_musicians_by_century.js",
             "./dbpedia/dbpedia_Classical_musicians_by_instrument.js",
@@ -27,22 +48,22 @@ if (cluster.isMaster) {
         );
 
     }
-    if (script == "worldcat") {
+    if (scriptsArray.includes("worldcat")) {
         console.log("Adding worldcat scripts");
         scriptsArray.push("./worldcat/worldcat.js"
         );
     }
-    if (script == "musicbrainz") {
+    if (scriptsArray.includes("musicbrainz")) {
         console.log("Adding musicbrainz scripts");
         scriptsArray.push("./musicbrainz/server.js"
         );
     }
-    if (script == "allmusic") {
+    if (scriptsArray.includes("allmusic")) {
         console.log("Adding almusic scripts");
         scriptsArray.push("./allmusic/allMusicScript.js"
         );
     }
-    if (script == "test") {
+    if (scriptsArray.includes("test")) {
         console.log("Adding test scripts");
         scriptsArray.push(
             "./testscripts/empty.js"
