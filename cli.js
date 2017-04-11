@@ -193,7 +193,7 @@ function populateWorks(context, worksData, artistsData, callback) {
     const works = context.models.works;
     const entities = context.models.entities;
     const artists = context.models.artists;
-    worksData.forEach(work => {
+)    worksData.forEach(work => {
         entities.create().then(entity => {
             works.create({
                 title: work.title,
@@ -231,10 +231,10 @@ function populateReleases(context, releasesData, artistsData, callback) {
                 country: release.country,
                 label: release.label,
                 entityId: entity.id
-            }).then(createdRelease => {
+            }).then((createdRelease) => {
                 //search artist from artistsData where id == releasesData id
                 var artistFound = artistsData.filter(function (artist) {
-                    return artist.musicbrainzArtistId == release.musicbrainzArtistId;
+                    return artist.musicbrainzArtistId === release.musicbrainzArtistId;
                 });
                 artists.findOne({where: {name: artistFound[0].name}}).then(function (queriedArtist) {
 
