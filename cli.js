@@ -225,11 +225,12 @@ function populateWorks(context, worksData, artistsData, callback) {
                 var artistFound = artistsData.filter(function (artist) {
                     return artist.musicbrainzArtistId === work.composer;
                 });
+                if (artistFound) {
+                    artists.findOne({where: {name: artistFound[0].name}}).then(function (queriedArtist) {
+                        createdWork.addArtists(queriedArtist);
 
-                artists.findOne({where: {name: artistFound[0].name}}).then(function (queriedArtist) {
-                    createdWork.addArtists(queriedArtist);
-
-                });
+                    });
+                }
 
 
             })
