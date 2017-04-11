@@ -1,0 +1,46 @@
+[
+  {
+    "name": "David Shifrin",
+    "nationality": "American",
+    "artist_type":"composer",
+    "dateOfBirth": null,
+    "dateOfDeath": null,
+    "placeOfBirth": null,
+    "placeOfDeath": null,
+    "instrument": ["flute","oboe"],
+    "pseudonym": null,
+    "work": [
+      "Suite No 2 in D major: Aria2",
+      "Work 1"
+    ],
+    "release": [
+      "Release 1",
+      "Unarum Fidium"
+    ],
+    "tag": [
+      "American classical musicians"
+    ],
+    "source_link": "http://dbpedia.org/resource/David_Shifrin",
+    "wikipedia_link": "http://en.wikipedia.org/wiki/David_Shifrin",
+    "wikipedia_pageid": "2798287"
+  },
+  {
+    "name": "Steve Bentfordt",
+    "nationality": "American",
+    "artist_type":"musician",
+    "dateOfBirth": null,
+    "dateOfDeath": null,
+    "placeOfBirth": null,
+    "placeOfDeath": null,
+    "instrument": ["horn","flute"],
+    "pseudonym": null,
+    "work": [],
+    "release": [],
+    "tag": [
+      "American classical musicians"
+    ],
+    "source_link": "http://dbpedia.org/resource/bsad",
+    "wikipedia_link": "http://en.wikipedia.org/wiki/asd",
+    "wikipedia_pageid": "45647"
+  }
+]

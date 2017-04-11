@@ -6,6 +6,8 @@ module.exports = function (returnToMaster) {
     var jsesc = require('jsesc');
     const replaceURLAndUnderscore = require('./helper/replaceURLAndUnderscore');
 
+    const outputFile = './scrapedoutput/dbpedia/dbPedia_Composers.json';
+
     var newObj = [];
     var url = [],
         link = [];
@@ -19,7 +21,7 @@ module.exports = function (returnToMaster) {
         getURL(value, function () {
             counter++;
             if (counter == url.length) {
-                fs.writeFileSync('./scrapedoutput/artists/dbPedia_Composers.json', JSON.stringify(newObj), 'utf-8');
+                fs.writeFileSync(outputFile, JSON.stringify(newObj), 'utf-8');
                 returnToMaster();
             }
         });

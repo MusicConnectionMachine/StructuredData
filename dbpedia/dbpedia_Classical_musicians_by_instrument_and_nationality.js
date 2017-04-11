@@ -7,6 +7,8 @@ module.exports = function (returnToMaster) {
     var jsesc = require('jsesc');
     const replaceURLAndUnderscore = require('./helper/replaceURLAndUnderscore');
 
+    const outputFile = "./scrapedoutput/dbpedia/dbpedia_Classical_musicians_by_instruments_and_nationality.json";
+
     var musicians = [],
         temp_list = [],
         temp_list1 = [],
@@ -64,7 +66,7 @@ module.exports = function (returnToMaster) {
                 sleep(1000);
             });
             jsonOutput = JSON.stringify(musicians); //convert it back to json
-            fs.writeFileSync("./scrapedoutput/artists/dbpedia_Classical_musicians_by_instruments_and_nationality.json", jsonOutput, 'utf8'); // write it back
+            fs.writeFileSync(outputFile, jsonOutput, 'utf8'); // write it back
             returnToMaster();
 
         });

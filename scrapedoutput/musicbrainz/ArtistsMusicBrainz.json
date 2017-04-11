@@ -1,0 +1,50 @@
+[
+  {
+    "name": "Johann Heinrich Schmelzer",
+    "artist_type": null,
+    "nationality": "Austria",
+    "dateOfBirth": "1620-01-01",
+    "dateOfDeath": "1680-03-01",
+    "placeOfBirth": "Scheibbs",
+    "placeOfDeath": "Praha",
+    "instrument": null,
+    "pseudonym": [],
+    "work": null,
+    "release": null,
+    "tag": [],
+    "source_link": "https://musicbrainz.org/artist/7b3e99fa-61f2-44f5-9719-208838b05178",
+    "musicbrainzArtistId": "7b3e99fa-61f2-44f5-9719-208838b05178"
+  },
+  {
+    "name": "Fabrizio Fontana",
+    "artist_type": null,
+    "nationality": "Italy",
+    "dateOfBirth": "1620-01-01",
+    "dateOfDeath": "1695-12-28",
+    "placeOfBirth": "Turin",
+    "placeOfDeath": "Rome",
+    "instrument": null,
+    "pseudonym": [],
+    "work": null,
+    "release": null,
+    "tag": [],
+    "source_link": "https://musicbrainz.org/artist/69567740-91a7-4ce0-843b-dc69eb5fd295",
+    "musicbrainzArtistId": "69567740-91a7-4ce0-843b-dc69eb5fd295"
+  },
+  {
+    "name": "Petrus Hurtado",
+    "artist_type": null,
+    "nationality": "Spain",
+    "dateOfBirth": "1620-01-01",
+    "dateOfDeath": "1671-01-01",
+    "placeOfBirth": "Turin",
+    "placeOfDeath": "Rome",
+    "instrument": null,
+    "pseudonym": [],
+    "work": null,
+    "release": null,
+    "tag": [],
+    "source_link": "https://musicbrainz.org/artist/c0c8e102-1cfc-4b67-957d-ee34dc13f0ef",
+    "musicbrainzArtistId": "c0c8e102-1cfc-4b67-957d-ee34dc13f0ef"
+  }
+]

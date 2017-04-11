@@ -7,6 +7,8 @@ module.exports = function (returnToMaster) {
     var jsesc = require('jsesc');
     const replaceURLAndUnderscore = require('./helper/replaceURLAndUnderscore');
 
+    const outputFile = './scrapedoutput/dbpedia/dbpedia_Classical_musicians_by_century.json';
+
     var url = [],
         musicians = [];
     url.push("http://dbpedia.org/page/Category:21st-century_classical_musicians");
@@ -22,7 +24,7 @@ module.exports = function (returnToMaster) {
             counter++;
             if (counter == url.length) {
                 var json2 = JSON.stringify(musicians); //convert it back to json
-                fs.writeFileSync('./scrapedoutput/artists/dbpedia_Classical_musicians_by_century.json', json2, 'utf8'); // write it back
+                fs.writeFileSync(outputFile, json2, 'utf8'); // write it back
                 returnToMaster();
             }
         });
