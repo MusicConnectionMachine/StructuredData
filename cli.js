@@ -130,14 +130,14 @@ function populateDB() {
              */
 
 
-            const musicbrainzArtistspath = path.join(__dirname, "scrapedoutput", "musicbrainz", "ArtistsMusicBrainz.json")
+            const musicbrainzArtistspath = path.join(__dirname, "scrapedoutput", "musicbrainz", "ArtistsMusicBrainz.json");
             fs.readFile(path.join(musicbrainzArtistspath), function (err, data) {
                 var artistsData = JSON.parse(data);
                 populateArtists(context, artistsData, () => {
                     let counter = 0;
                     musicbrainzPopulateWorks(context, artistsData, () => {
                         counter++;
-                        if (counter == 2) {
+                        if (counter === 2) {
                             dbpediaPopulateArtists(context);
                         }
                     });
@@ -177,7 +177,7 @@ function musicbrainzPopulateWorks(context, artistsData, callback) {
 }
 
 function musicbrainzPopulateReleases(context, artistsData, callback) {
-    const musicbrainzReleasespath = path.join(__dirname, "scrapedoutput", "musicbrainz", "ReleasesMusicBrainz.json")
+    const musicbrainzReleasespath = path.join(__dirname, "scrapedoutput", "musicbrainz", "ReleasesMusicBrainz.json");
 
     fs.readFile(musicbrainzReleasespath, function (err, data) {
         if (err) {
@@ -201,7 +201,7 @@ function populateWorks(context, worksData, artistsData, callback) {
             }).then(createdWork => {
                 //search artist from artistsData where id == worksData id
                 var artistFound = artistsData.filter(function (artist) {
-                    return artist.musicbrainzArtistId == work.composer;
+                    return artist.musicbrainzArtistId === work.composer;
                 });
 
                 artists.findOne({where: {name: artistFound[0].name}}).then(function (queriedArtist) {
