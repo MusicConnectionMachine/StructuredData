@@ -122,10 +122,10 @@ function populateDB() {
         context.sequelize.sync({force: true}).then(function () {
 
             /* Order:
-            1. musicbrainz artists
-            2. musicbrainz works/releases (as seperate input files)
-            3. dbpedia artists
-            4. dbpedia works/releases (as array in the artists input)
+             1. musicbrainz artists
+             2. musicbrainz works/releases (as seperate input files)
+             3. dbpedia artists
+             4. dbpedia works/releases (as array in the artists input)
 
              */
 
@@ -193,7 +193,7 @@ function populateWorks(context, worksData, artistsData, callback) {
     const works = context.models.works;
     const entities = context.models.entities;
     const artists = context.models.artists;
-)    worksData.forEach(work => {
+    worksData.forEach((work) => {
         entities.create().then(entity => {
             works.create({
                 title: work.title,
@@ -289,7 +289,7 @@ function populateArtists(context, artistsOutput, callback) {
                     artist.instrument.forEach(function (instrument) {
                         /*TODO This somehow still creates multiple instruments of the same name, ven though this should not happen
                          after the checks in line 427.... needs to be fixed*/
-                         connectArtistToInstruments(context, createdArtist, instrument);
+                        connectArtistToInstruments(context, createdArtist, instrument);
                     });
                 }
             });
@@ -300,7 +300,6 @@ function populateArtists(context, artistsOutput, callback) {
     });
     callback();
 }
-
 
 
 function dbpediaPopulateArtists(context) {
@@ -314,7 +313,8 @@ function dbpediaPopulateArtists(context) {
             //for each file, read  it and do bulk create
             fs.readFile(path.join(dbpediaArtistsPath, file), function (err, data) {
                 var artistsData = JSON.parse(data);
-                populateArtists(context, artistsData,()=>{});
+                populateArtists(context, artistsData, () => {
+                });
             })
         });
     });
@@ -355,7 +355,7 @@ function connectArtistToReleases(context, createdArtist, release) {
                 }).then(createdRelease => {
                     createdArtist.addReleases(createdRelease);
                 })
-              
+
             });
         }
         else {
@@ -377,10 +377,10 @@ function connectArtistToInstruments(context, createdArtist, instrument) {
                     name: instrument,
                     entityId: entity.id
                 }).then(createdInstrument => {
-                    if(createdArtist.artist_type == "composer"){
+                    if (createdArtist.artist_type == "composer") {
                         createdArtist.addComposer(createdInstrument);
                     }
-                    if(createdArtist.artist_type == "musician"){
+                    if (createdArtist.artist_type == "musician") {
                         createdArtist.addPlayer(createdInstrument);
                     }
 
@@ -389,10 +389,10 @@ function connectArtistToInstruments(context, createdArtist, instrument) {
             });
         }
         else {
-            if(createdArtist.artist_type == "composer"){
+            if (createdArtist.artist_type == "composer") {
                 createdArtist.addComposer(queriedInstrument);
             }
-            if(createdArtist.artist_type == "musician"){
+            if (createdArtist.artist_type == "musician") {
                 createdArtist.addPlayer(queriedInstrument);
             }
         }
