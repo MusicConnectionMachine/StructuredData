@@ -49,12 +49,20 @@ module.exports = {
                                         currReleases.date = currReleases.date + "-01"
                                     }
                                 }
+                                var format;
+                                if(currReleases.media && currReleases.media[0].format){
+                                    format = currReleases.media[0].format;
+                                }
+                                var label;
+                                if(currReleases["label-info"] && currReleases["label-info"][0].label && currReleases["label-info"][0].label.name){
+                                    currReleases.label = currReleases["label-info"][0].label.name;
+                                }
                                 releasesAPI.push({
                                     title: currReleases.title,
-                                    format: currReleases.media[0].format,
+                                    format: format,
                                     date: currReleases.date,
                                     country: currReleases.country,
-                                    label: currReleases["label-info"][0].label.name,
+                                    label: label,
                                     musicbrainzArtistId: artists[i].artistId
                                 });
                             }
