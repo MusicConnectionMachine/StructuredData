@@ -3,21 +3,43 @@ const path = require('path');
 const fs = require('fs');
 const cluster = require('cluster');
 var scriptsArray = [];
-var script, postgresCS;
+var scriptsInput = [];
+const availableScripts = ["dbpedia", "worldcat", "musicbrainz", "allmusic"]
+var postgresCS;
 if (cluster.isMaster) {
 
     commander
-        .option('-s, --script [script]', 'Define the scripts that should be executed', /^(dbpedia|worldcat|musicbrainz|allmusic|test)$/i)
-        .option('-d, --database [database] ', 'Set the connection string to connect to the database.')
-        .option('-t, --threads [threads] ', 'Set the amount of worker threads that should be spawned.')
+        .option('-d, --database <database> ', 'Set the connection string to connect to the database.')
+        .option('-t, --threads <threads> ', 'Set the amount of worker threads that should be spawned.')
+        .arguments('[scripts...] ', /^(dbpedia|worldcat|musicbrainz|allmusic|test)$/i)
+        .action(function (scripts) {
+            scripts.forEach(function (script) {
+                if (script == "all") {
+                    scriptsInput = availableScripts
+                }
+                else if (availableScripts.includes(script) || script == "test") {
+                    scriptsInput.push(script);
+                }
+                else {
+                    console.log("invalid scriptsArray argument: " + script)
+                }
+            })
+        })
         .parse(process.argv);
 
-    script = commander.script || process.env.s;
+    if (scriptsInput.length === 0) {
+        scriptsInput = process.env.s;
+    }
+
+    if (!scriptsInput) {
+        console.log("No scripts specified. Aborting...")
+        process.exit();
+    }
 
     postgresCS = commander.database || process.env.d;
 
 
-    if (script == "dbpedia") {
+    if (scriptsInput.includes("dbpedia")) {
         console.log("Adding dbpedia scripts");
         scriptsArray.push("./dbpedia/dbpedia_Classical_musicians_by_century.js",
             "./dbpedia/dbpedia_Classical_musicians_by_instrument.js",
@@ -27,22 +49,22 @@ if (cluster.isMaster) {
         );
 
     }
-    if (script == "worldcat") {
+    if (scriptsInput.includes("worldcat")) {
         console.log("Adding worldcat scripts");
-        scriptsArray.push("./worldcat/worldcat.js"
+        scriptsArray.push("./WorldCat/worldcat.js"
         );
     }
-    if (script == "musicbrainz") {
+    if (scriptsInput.includes("musicbrainz")) {
         console.log("Adding musicbrainz scripts");
         scriptsArray.push("./musicbrainz/server.js"
         );
     }
-    if (script == "allmusic") {
+    if (scriptsInput.includes("allmusic")) {
         console.log("Adding almusic scripts");
         scriptsArray.push("./allmusic/allMusicScript.js"
         );
     }
-    if (script == "test") {
+    if (scriptsInput.includes("test")) {
         console.log("Adding test scripts");
         scriptsArray.push(
             "./testscripts/empty.js"
@@ -203,11 +225,12 @@ function populateWorks(context, worksData, artistsData, callback) {
                 var artistFound = artistsData.filter(function (artist) {
                     return artist.musicbrainzArtistId === work.composer;
                 });
+                if (artistFound) {
+                    artists.findOne({where: {name: artistFound[0].name}}).then(function (queriedArtist) {
+                        createdWork.addArtists(queriedArtist);
 
-                artists.findOne({where: {name: artistFound[0].name}}).then(function (queriedArtist) {
-                    createdWork.addArtists(queriedArtist);
-
-                });
+                    });
+                }
 
 
             })
