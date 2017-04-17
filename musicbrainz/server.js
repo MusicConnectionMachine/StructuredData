@@ -61,28 +61,19 @@ module.exports = function (returnToMaster) {
                     return artistai.id;
                 });
 
-                var finishedscrapers = 0;
                 getArtists.getArtists(finalArray, function () {
-                    finishedscrapers++;
-                    if (finishedscrapers === 3) {
-                        console.log("musicbrainz finished writing artists");
-                        returnToMaster();
-                    }
+                    console.log("musicbrainz finished writing artists");
+                    getReleases.getReleases(finalArray, function () {
+                        console.log("musicbrainz finished writing releases");
+                        getWorks.getWorks(finalArray, function () {
+                            console.log("musicbrainz finished writing works");
+                            returnToMaster();
+
+                        });
+                    });
                 });
-                getReleases.getReleases(finalArray, function () {
-                    console.log("musicbrainz finished writing releases");
-                    finishedscrapers++;
-                    if (finishedscrapers === 3) {
-                        returnToMaster();
-                    }
-                });
-                getWorks.getWorks(finalArray, function () {
-                    console.log("musicbrainz finished writing works");
-                    finishedscrapers++;
-                    if (finishedscrapers === 3) {
-                        returnToMaster();
-                    }
-                });
+
+
 
 
             }

@@ -65,7 +65,7 @@ module.exports = {
             if (elemNum == finalArray.length) {
                 clearInterval(intervalId2);
             }
-        }, 3000)
+        }, 1200)
     },
 };
 
