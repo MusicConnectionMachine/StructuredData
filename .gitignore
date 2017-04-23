@@ -38,3 +38,6 @@ jspm_packages
 
 # .idea
 .idea/
+
+
+.DS_Store
