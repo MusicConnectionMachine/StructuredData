@@ -180,12 +180,9 @@ function populateDB(postgresConnectionString) {
             console.error(error);
             process.exit(2);
         });
-
-
     });
-
-
 }
+
 function musicbrainzPopulateWorks(context, artistsData, callback) {
     const musicbrainzWorkspath = path.join(__dirname, "scrapedoutput", "musicbrainz", "WorksMusicBrainz.json");
 
@@ -229,12 +226,9 @@ function populateWorks(context, worksData, artistsData, callback) {
                 if (artistFound) {
                     artists.findOne({where: {name: artistFound[0].name}}).then(function (queriedArtist) {
                         createdWork.addArtists(queriedArtist);
-
                     });
                 }
-
-
-            })
+            });
         }).catch(function (error) {
             console.log("Error while creating work " + work.title + ": " + error);
         });
