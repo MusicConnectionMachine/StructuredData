@@ -4,14 +4,13 @@ const fs = require('fs');
 const cluster = require('cluster');
 var scriptsArray = [];
 var scriptsInput = [];
-const availableScripts = ["dbpedia", "worldcat", "musicbrainz", "allmusic"]
-var postgresCS;
+const availableScripts = ["dbpedia", "worldcat", "musicbrainz", "allmusic", "imslp"]
 if (cluster.isMaster) {
 
     commander
         .option('-d, --database <database> ', 'Set the connection string to connect to the database.')
         .option('-t, --threads <threads> ', 'Set the amount of worker threads that should be spawned.')
-        .arguments('[scripts...] ', /^(dbpedia|worldcat|musicbrainz|allmusic|test)$/i)
+        .arguments('[scripts...] ', /^(dbpedia|worldcat|musicbrainz|allmusic|imslp|test)$/i)
         .action(function (scripts) {
             scripts.forEach(function (script) {
                 if (script == "all") {
@@ -35,8 +34,6 @@ if (cluster.isMaster) {
         console.log("No scripts specified. Aborting...")
         process.exit();
     }
-
-    postgresCS = commander.database || process.env.d;
 
 
     if (scriptsInput.includes("dbpedia")) {
@@ -64,6 +61,12 @@ if (cluster.isMaster) {
         scriptsArray.push("./allmusic/allMusicScript.js"
         );
     }
+    if (scriptsInput.includes("imslp")) {
+        console.log("Adding imslp script");
+        scriptsArray.push(
+            "./IMSLP/imslp.js"
+        );
+    }
     if (scriptsInput.includes("test")) {
         console.log("Adding test scripts");
         scriptsArray.push(
@@ -71,9 +74,9 @@ if (cluster.isMaster) {
         );
     }
 
-
     var cpus = require('os').cpus().length;
     var numWorkers;
+    let postgresConnectionString = commander.database || process.env.d;
 
     if (commander.threads) {
         if (commander.threads > cpus) {
@@ -97,7 +100,7 @@ if (cluster.isMaster) {
         var scriptToExecute = scriptsArray.pop();
         if (scriptToExecute) {
             //let worker execute the scrape script
-            worker.send(scriptToExecute);
+            worker.send([scriptToExecute, postgresConnectionString]);
         }
 
     }
@@ -108,7 +111,7 @@ if (cluster.isMaster) {
         if (scriptToExecute) {
             // if a worker dies and there are still remaining scripts, spawn a new worker and let him execute it
             var worker = cluster.fork();
-            worker.send(scriptToExecute);
+            worker.send([scriptToExecute, postgresConnectionString]);
         }
     });
 
@@ -118,28 +121,27 @@ if (cluster.isMaster) {
         if (scrapingcounter === 0) {
             //once all scraping scripts finished, populate the db
             console.log("all done");
-            populateDB();
+            populateDB(postgresConnectionString);
         }
     });
 }
 else {
-    process.on("message", function (scriptToExecute) {
-        console.log("Worker is executing " + scriptToExecute);
+    process.on("message", function (options) {
+        let [scriptToExecute, postgresConnectionString] = options;
+        console.log("Worker is executing " + scriptToExecute + " with connection to " + postgresConnectionString);
         var script = require(scriptToExecute);
-        script(function () {
+        script(() => {
             console.log(scriptToExecute + " finished successfully");
             process.send("done");
             process.exit();
-        })
-
+        }, postgresConnectionString);
     });
-
 }
 
-function populateDB() {
+function populateDB(postgresConnectionString) {
     console.log("Starting to populate db");
 
-    require(path.join(__dirname, "api", "database.js")).connect(postgresCS, function (context) {
+    require(path.join(__dirname, "api", "database.js")).connect(postgresConnectionString, function (context) {
 
         context.sequelize.sync({force: true}).then(function () {
 
@@ -148,7 +150,6 @@ function populateDB() {
              2. musicbrainz works/releases (as seperate input files)
              3. dbpedia artists
              4. dbpedia works/releases (as array in the artists input)
-
              */
 
 
@@ -326,7 +327,7 @@ function populateArtists(context, artistsOutput, callback) {
 
 
 function dbpediaPopulateArtists(context) {
-    const dbpediaArtistsPath = path.join(__dirname, "scrapedoutput", "dbpedia")
+    const dbpediaArtistsPath = path.join(__dirname, "scrapedoutput", "dbpedia");
     fs.readdir(dbpediaArtistsPath, (err, files) => {
         if (err) {
             console.log(err);
@@ -385,7 +386,6 @@ function connectArtistToReleases(context, createdArtist, release) {
             createdArtist.addReleases(queriedRelease);
         }
     });
-
 }
 
 
@@ -406,8 +406,6 @@ function connectArtistToInstruments(context, createdArtist, instrument) {
                     if (createdArtist.artist_type == "musician") {
                         createdArtist.addPlayer(createdInstrument);
                     }
-
-
                 })
             });
         }
