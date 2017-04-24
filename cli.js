@@ -143,8 +143,6 @@ function populateDB(postgresConnectionString) {
 
     require(path.join(__dirname, "api", "database.js")).connect(postgresConnectionString, function (context) {
 
-        context.sequelize.sync({force: true}).then(function () {
-
             /* Order:
              1. musicbrainz artists
              2. musicbrainz works/releases (as seperate input files)
@@ -174,12 +172,6 @@ function populateDB(postgresConnectionString) {
 
                 });
             });
-
-        }).catch(function (error) {
-            console.error("There was an error while synchronizing the tables between the application and the database.");
-            console.error(error);
-            process.exit(2);
-        });
     });
 }
 
