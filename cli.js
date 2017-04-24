@@ -315,7 +315,16 @@ function populateArtists(context, artistsOutput, callback) {
                 }
                 if (artist.instrument) {
                     artist.instrument.forEach(function (instrument) {
-                        connectArtistToInstruments(context, createdArtist, instrument);
+                        if(instrument.includes(",")){
+                           let tempInstruments = instrument.split(",");
+                            tempInstruments.forEach((tempInstrument)=>{
+                                connectArtistToInstruments(context, createdArtist, tempInstrument);
+                            })
+                        }
+                        else{
+                            connectArtistToInstruments(context, createdArtist, instrument);
+                        }
+
                     });
                 }
             });
