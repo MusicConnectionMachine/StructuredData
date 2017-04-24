@@ -4,6 +4,7 @@ const fs = require('fs');
 const cluster = require('cluster');
 var scriptsArray = [];
 var scriptsInput = [];
+let instrumentsArray = [];
 const availableScripts = ["dbpedia", "worldcat", "musicbrainz", "allmusic", "imslp"]
 if (cluster.isMaster) {
 
@@ -152,6 +153,15 @@ function populateDB(postgresConnectionString) {
              4. dbpedia works/releases (as array in the artists input)
              */
 
+            //prepopulate instrumentsArray
+            const instruments = context.models.instruments;
+            instruments.findAll().then((queriedInstruments)=>{
+                queriedInstruments.forEach((instrument)=>{
+                    if(!instrumentsArray.includes(instrument)){
+                        instrumentsArray.push(instrument.name)
+                    }
+                })
+            });
 
             const musicbrainzArtistspath = path.join(__dirname, "scrapedoutput", "musicbrainz", "ArtistsMusicBrainz.json");
             fs.readFile(path.join(musicbrainzArtistspath), function (err, data) {
@@ -305,9 +315,16 @@ function populateArtists(context, artistsOutput, callback) {
                 }
                 if (artist.instrument) {
                     artist.instrument.forEach(function (instrument) {
-                        /*TODO This somehow still creates multiple instruments of the same name, ven though this should not happen
-                         after the checks in line 427.... needs to be fixed*/
-                        connectArtistToInstruments(context, createdArtist, instrument);
+                        if(instrument.includes(",")){
+                           let tempInstruments = instrument.split(",");
+                            tempInstruments.forEach((tempInstrument)=>{
+                                connectArtistToInstruments(context, createdArtist, tempInstrument);
+                            })
+                        }
+                        else{
+                            connectArtistToInstruments(context, createdArtist, instrument);
+                        }
+
                     });
                 }
             });
@@ -339,6 +356,10 @@ function dbpediaPopulateArtists(context) {
 }
 
 function connectArtistToWorks(context, createdArtist, work) {
+    if(work.startsWith("dbr:")){
+        work = work.replace("dbr:","");
+
+    }
     const works = context.models.works;
     const entities = context.models.entities;
     works.findOne({where: {title: work}}).then(function (queriedWork) {
@@ -384,32 +405,33 @@ function connectArtistToReleases(context, createdArtist, release) {
 
 
 function connectArtistToInstruments(context, createdArtist, instrument) {
+    if(instrument.trim()==="*"){
+        return
+    }
     const instruments = context.models.instruments;
     const entities = context.models.entities;
-    instruments.findOne({where: {name: instrument}}).then(function (queriedInstrument) {
-        // if instrument does not exist yet, create it
-        if (!queriedInstrument) {
-            entities.create().then(entity => {
-                instruments.create({
-                    name: instrument,
-                    entityId: entity.id
-                }).then(createdInstrument => {
-                    if (createdArtist.artist_type == "composer") {
-                        createdArtist.addComposer(createdInstrument);
-                    }
-                    if (createdArtist.artist_type == "musician") {
-                        createdArtist.addPlayer(createdInstrument);
-                    }
-                })
-            });
+    if(instrumentsArray.includes(instrument)){
+        if (createdArtist.artist_type == "composer") {
+            createdArtist.addComposer(instrument);
         }
-        else {
-            if (createdArtist.artist_type == "composer") {
-                createdArtist.addComposer(queriedInstrument);
-            }
-            if (createdArtist.artist_type == "musician") {
-                createdArtist.addPlayer(queriedInstrument);
-            }
+        if (createdArtist.artist_type == "musician") {
+            createdArtist.addPlayer(instrument);
         }
-    });
+    }
+    else{
+        instrumentsArray.push(instrument);
+        entities.create().then(entity => {
+            instruments.create({
+                name: instrument,
+                entityId: entity.id
+            }).then(createdInstrument => {
+                if (createdArtist.artist_type == "composer") {
+                    createdArtist.addComposer(createdInstrument);
+                }
+                if (createdArtist.artist_type == "musician") {
+                    createdArtist.addPlayer(createdInstrument);
+                }
+            })
+        });
+    }
 }
