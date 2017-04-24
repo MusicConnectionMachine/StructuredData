@@ -401,6 +401,9 @@ function connectArtistToReleases(context, createdArtist, release) {
 
 
 function connectArtistToInstruments(context, createdArtist, instrument) {
+    if(instrument.trim()==="*"){
+        return
+    }
     const instruments = context.models.instruments;
     const entities = context.models.entities;
     if(instrumentsArray.includes(instrument)){
