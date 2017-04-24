@@ -356,6 +356,10 @@ function dbpediaPopulateArtists(context) {
 }
 
 function connectArtistToWorks(context, createdArtist, work) {
+    if(work.startsWith("dbr:")){
+        work = work.replace("dbr:","");
+
+    }
     const works = context.models.works;
     const entities = context.models.entities;
     works.findOne({where: {title: work}}).then(function (queriedWork) {
