@@ -83,13 +83,13 @@ module.exports = function ($) {
     var dbpwriter = $('a[rev="dbp:writer"]');
     if (dbowriter.text().trim()) {
         dbowriter.each(function (index) {
-            var rel = replaceURLAndUnderscore($(this).text().trim());
+            var rel = replaceURLAndUnderscore($(this).text().trim().replace("dbr:",""));
             work.push(rel);
         });
     }
     if (dbpwriter.text().trim()) {
         dbpwriter.each(function (index) {
-            var rel = replaceURLAndUnderscore($(this).text().trim());
+            var rel = replaceURLAndUnderscore($(this).text().trim().replace("dbr:",""));
             work.push(rel);
         });
     }
