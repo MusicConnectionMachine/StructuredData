@@ -128,13 +128,17 @@ module.exports = (callback, postgresConnectionString) => {
                 const artistsModel = context.models.artists;
                 const instrumentsModel = context.models.instruments;
                 const worksModel = context.models.works;
+                const entityModel = context.models.entities;
 
-                artists.getArtists().forEach((artist)=>{
+                artists.getArtists().forEach((artist) => {
                     let artistPromise = Promises.defer();
                     promises.push(artistPromise.promise);
 
-                    artistsModel.create(artist).then(() => {
-                        artistPromise.resolve();
+                    entityModel.create().then(entity => {
+                        artist.entityId = entity.id;
+                        artistsModel.create(artist).then(() => {
+                            artistPromise.resolve();
+                        });
                     });
                 });
 
@@ -148,9 +152,12 @@ module.exports = (callback, postgresConnectionString) => {
                         }
                     }).then(function (matchInstrument) {
                         // if instrument does not exist yet, create it
-                        if (matchInstrument !== undefined && matchInstrument !== null) {
-                            instrumentsModel.create(instrument).then(() => {
-                                instrumentPromise.resolve();
+                        if (matchInstrument === undefined || matchInstrument === null) {
+                            entityModel.create().then(entity => {
+                                instrument.entityId = entity.id;
+                                instrumentsModel.create(instrument).then(() => {
+                                    instrumentPromise.resolve();
+                                });
                             });
                         } else {
                             instrumentPromise.resolve();
@@ -162,13 +169,16 @@ module.exports = (callback, postgresConnectionString) => {
                     let workPromise = Promises.defer();
                     promises.push(workPromise.promise);
 
-                    worksModel.create(work).then(() => {
-                        workPromise.resolve();
+                    entityModel.create().then(entity => {
+                        work.entityId = entity.id;
+                        worksModel.create(work).then(() => {
+                            workPromise.resolve();
+                        });
                     });
                 });
 
                 Promises.all(promises).then(() => {
-                    console.log("Inserted artist, work and instruments.")
+                    console.log("Inserted artist, work and instruments.");
 
                     // TODO - mapping instruments to artists, works to artists
                     callback();
