@@ -1,3 +1,8 @@
+/*
+When executing worldcat, use:
+node --max_old_space_size=4096 cli.js worldcat
+ */
+
 const commander = require('commander');
 const path = require('path');
 const fs = require('fs');
@@ -150,14 +155,15 @@ function populateDB(postgresConnectionString) {
              2. musicbrainz works/releases (as seperate input files)
              3. dbpedia artists
              4. dbpedia works/releases (as array in the artists input)
+             5. worldcat releases
              */
 
             //prepopulate instrumentsArray
             const instruments = context.models.instruments;
-            instruments.findAll().then((queriedInstruments)=>{
-                queriedInstruments.forEach((instrument)=>{
-                    if(!instrumentsArray.includes(instrument)){
-                        instrumentsArray.push(instrument.name)
+            instruments.findAll().then((queriedInstruments) => {
+                queriedInstruments.forEach((instrument) => {
+                    if (!instrumentsArray.includes(instrument)) {
+                        instrumentsArray.push(instrument)
                     }
                 })
             });
@@ -226,7 +232,7 @@ function populateWorks(context, worksData, artistsData, callback) {
                 var artistFound = artistsData.filter(function (artist) {
                     return artist.musicbrainzArtistId === work.composer;
                 });
-                if (artistFound) {
+                if (artistFound && artistFound.length != 0) {
                     artists.findOne({where: {name: artistFound[0].name}}).then(function (queriedArtist) {
                         createdWork.addArtists(queriedArtist);
                     });
@@ -254,14 +260,17 @@ function populateReleases(context, releasesData, artistsData, callback) {
                 entityId: entity.id
             }).then((createdRelease) => {
                 //search artist from artistsData where id == releasesData id
-                var artistFound = artistsData.filter(function (artist) {
+                let artistFound = artistsData.find(artist=> {
                     return artist.musicbrainzArtistId === release.musicbrainzArtistId;
                 });
-                artists.findOne({where: {name: artistFound[0].name}}).then(function (queriedArtist) {
+                if(artistFound ){
+                    artists.findOne({where: {name: artistFound.name}}).then(function (queriedArtist) {
 
-                    createdRelease.addArtists(queriedArtist);
+                        createdRelease.addArtists(queriedArtist);
 
-                });
+                    });
+                }
+
 
 
             })
@@ -286,7 +295,6 @@ function populateArtists(context, artistsOutput, callback) {
                 dateOfDeath: artist.dateOfDeath,
                 placeOfBirth: artist.placeOfBirth,
                 placeOfDeath: artist.placeOfDeath,
-                instrument: artist.instrument,
                 pseudonym: artist.pseudonym,
                 /*work: artist.work,
                  release: artist.release,*/
@@ -308,13 +316,13 @@ function populateArtists(context, artistsOutput, callback) {
                 }
                 if (artist.instrument) {
                     artist.instrument.forEach(function (instrument) {
-                        if(instrument.includes(",")){
-                           let tempInstruments = instrument.split(",");
-                            tempInstruments.forEach((tempInstrument)=>{
+                        if (instrument.includes(",")) {
+                            let tempInstruments = instrument.split(",");
+                            tempInstruments.forEach((tempInstrument) => {
                                 connectArtistToInstruments(context, createdArtist, tempInstrument);
                             })
                         }
-                        else{
+                        else {
                             connectArtistToInstruments(context, createdArtist, instrument);
                         }
 
@@ -346,11 +354,12 @@ function dbpediaPopulateArtists(context) {
             })
         });
     });
+    worldcatPopulateReleases(context);
 }
 
 function connectArtistToWorks(context, createdArtist, work) {
-    if(work.startsWith("dbr:")){
-        work = work.replace("dbr:","");
+    if (work.startsWith("dbr:")) {
+        work = work.replace("dbr:", "");
 
     }
     const works = context.models.works;
@@ -396,29 +405,30 @@ function connectArtistToReleases(context, createdArtist, release) {
     });
 }
 
-
 function connectArtistToInstruments(context, createdArtist, instrument) {
-    if(instrument.trim()==="*"){
+    if (instrument.trim() === "*") {
         return
     }
     const instruments = context.models.instruments;
     const entities = context.models.entities;
-    if(instrumentsArray.includes(instrument)){
+    let existingInstrument = instrumentsArray.find(element => {
+        return element.name == instrument
+    });
+    if (existingInstrument) {
         if (createdArtist.artist_type == "composer") {
-            createdArtist.addComposer(instrument);
-
+            createdArtist.addComposer(existingInstrument);
         }
         if (createdArtist.artist_type == "musician") {
-            createdArtist.addPlayer(instrument);
+            createdArtist.addPlayer(existingInstrument);
         }
     }
-    else{
-        instrumentsArray.push(instrument);
+    else {
         entities.create().then(entity => {
             instruments.create({
                 name: instrument,
                 entityId: entity.id
             }).then(createdInstrument => {
+                instrumentsArray.push(createdInstrument);
                 if (createdArtist.artist_type == "composer") {
                     createdArtist.addComposer(createdInstrument);
                 }
@@ -428,4 +438,93 @@ function connectArtistToInstruments(context, createdArtist, instrument) {
             })
         });
     }
+}
+
+
+function worldcatPopulateReleases(context) {
+    const worldcatReleasespath = path.join(__dirname, "scrapedoutput", "worldcat", "worldcat.json");
+    fs.readFile(path.join(worldcatReleasespath), function (err, data) {
+        if (data) {
+            var releasesData = JSON.parse(data);
+
+            const releases = context.models.releases;
+            const entities = context.models.entities;
+            const artists = context.models.artists;
+
+
+            releasesData.forEach(release => {
+                //if their is no artist, simply create the release
+                if (release.artist.trim() == "") {
+                    entities.create().then(entity => {
+
+                        releases.create({
+                            title: release.title,
+                            source_link: release.source_link,
+                            entityId: entity.id
+                        })
+                    }).catch(function (error) {
+                        console.log("Error while creating release " + release.title + ": " + error);
+                    });
+                }
+                else {
+                    if (release.artist.includes(";")) {
+                        let artistsArray = release.artist.split(";");
+                        artistsArray.forEach(artist => {
+                            worldcatCreateArtist(release, artist);
+                        })
+                    }
+                    else {
+                        worldcatCreateArtist(release, release.artist);
+                    }
+                    function worldcatCreateArtist(release, thisArtist) {
+                        //check if artist already exists
+                        artists.findOne({where: {name: thisArtist}}).then(function (queriedArtist) {
+                            if (queriedArtist) {
+                                worldcatCreateRelease(release, queriedArtist);
+                            }
+                            //else create it first
+                            else {
+                                entities.create().then(entity => {
+                                    artists.create({
+                                        name: thisArtist,
+                                        entityId: entity.id
+                                    }).then((createdArtist) => {
+                                        worldcatCreateRelease(release, createdArtist);
+                                    });
+                                })
+                            }
+                            function worldcatCreateRelease(release, releaseArtist) {
+                                releases.findOne({where: {title: release.title}}).then(function (queriedRelease) {
+                                    if (queriedRelease) {
+                                        queriedRelease.addArtists(releaseArtist);
+                                    }
+                                    else {
+                                        entities.create().then(entity => {
+                                            releases.create({
+                                                title: release.title,
+                                                source_link: release.source_link,
+                                                entityId: entity.id
+                                            }).then(createdRelease => {
+                                                createdRelease.addArtists(releaseArtist);
+                                            })
+                                        })
+                                    }
+                                })
+                            }
+
+                        }).catch(function (error) {
+                            console.log("Error while creating release " + release.title + ": " + error);
+                        });
+                    }
+
+
+                }
+
+
+            });
+
+        }
+
+//        process.exit(0);
+    });
 }
