@@ -1,15 +1,17 @@
 const fs = require('fs');
 const path = require('path');
 const uuid = require('uuid/v1');
-const Promises = require('q');
 
-module.exports = (callback, postgresConnectionString) => {
+
+let populateFromImslp = (callback, postgresConnectionString) => {
     fs.readFile(path.join(__dirname, "composition-metadata.tsv"), 'utf8', (err,data) => {
         if (err) {
             return console.error(err);
         }
         data = data.split('\n');
 
+
+        let entityIds = [];
         let artists = (() => {
             let list = [];
 
@@ -18,6 +20,11 @@ module.exports = (callback, postgresConnectionString) => {
                     let match = list.find((element)=>element.name === artist.name);
                     if(match === undefined){
                         list.push(artist);
+
+                        entityIds.push({
+                            id: artist.entityId
+                        });
+
                         return artist.artistId;
                     } else {
                         return match.artistId;
@@ -39,6 +46,11 @@ module.exports = (callback, postgresConnectionString) => {
                     let match = list.find((element)=>element.artistId === instrument.artistId);
                     if(match === undefined) {
                         list.push(instrument);
+
+                        entityIds.push({
+                            id: instrument.entityId
+                        });
+
                     }
                 },
                 getInstruments(){
@@ -89,7 +101,9 @@ module.exports = (callback, postgresConnectionString) => {
                     })(),
                     "artist_type":"composer",
                     "tag": [currentElement['Composer Time Period']],
-                    "artistId": uuid()
+
+                    "entityId": uuid()
+
                 };
 
                 artistId = artists.add(artist);
@@ -98,7 +112,9 @@ module.exports = (callback, postgresConnectionString) => {
                     currentElement['Instrumentation'].split(', ').forEach((instrument) => {
                         instruments.add({
                             name: instrument,
-                            artistId: artistId
+
+                            artistId: artistId,
+                            entityId: uuid()
                         })
                     });
                 }
@@ -106,13 +122,26 @@ module.exports = (callback, postgresConnectionString) => {
 
             let work = {
                 "title": currentElement['Work Title'],
-                "dedication": currentElement['Dedication'],
-                "style": currentElement['Piece Style'],
-                "tags": currentElement['Tags'],
-                "artistId": artistId
+
+                "artistId": artistId,
+                "entityId": uuid()
             };
 
+            if(currentElement['Dedication']){
+                work.dedication = currentElement['Dedication']
+            }
+            if(currentElement['Style']){
+                work.style = currentElement['Style']
+            }
+            if(currentElement['Tags']){
+                work.tags = currentElement['Tags']
+            }
+
             works.push(work);
+            entityIds.push({
+                id: work.entityId
+            });
+
         });
 
         console.log("Collected " + works.length + " works, " + artists.getArtists().length + " artists and " + instruments.getInstruments().length + " instruments.");
@@ -121,58 +150,37 @@ module.exports = (callback, postgresConnectionString) => {
             .connect(postgresConnectionString, (context) => {
                 console.log("Connected");
 
-                context.sequelize.sync({force: true});
-
-                let promises = [];
-
                 const artistsModel = context.models.artists;
                 const instrumentsModel = context.models.instruments;
                 const worksModel = context.models.works;
+                const entityModel = context.models.entities;
 
-                artists.getArtists().forEach((artist)=>{
-                    let artistPromise = Promises.defer();
-                    promises.push(artistPromise.promise);
+                entityModel.bulkCreate(entityIds)
+                    .then(() => {
+                        console.log("created entities");
+                        artistsModel.bulkCreate(artists.getArtists())
+                            .then(() => {
+                                console.log("created artists");
+                                instrumentsModel.bulkCreate(instruments.getInstruments())
+                                    .then(() => {
+                                        console.log("created instruments");
+                                        worksModel.bulkCreate(works, {returning: true})
+                                            .then(() => {
+                                                console.log("created works");
 
-                    artistsModel.create(artist).then(() => {
-                        artistPromise.resolve();
-                    });
-                });
+                                                console.log("Inserted artist, work and instruments.");
 
-                instruments.getInstruments().forEach((instrument) => {
-                    let instrumentPromise = Promises.defer();
-                    promises.push(instrumentPromise.promise);
-
-                    instrumentsModel.findOne({
-                        where: {
-                            name: instrument.name
-                        }
-                    }).then(function (matchInstrument) {
-                        // if instrument does not exist yet, create it
-                        if (matchInstrument !== undefined && matchInstrument !== null) {
-                            instrumentsModel.create(instrument).then(() => {
-                                instrumentPromise.resolve();
+                                                // TODO - mapping instruments to artists, works to artists
+                                                return callback();
+                                            });
+                                    })
+                                .catch((err) => {
+                                    console.log(err);
+                                });
                             });
-                        } else {
-                            instrumentPromise.resolve();
-                        }
                     });
-                });
-
-                works.forEach((work) => {
-                    let workPromise = Promises.defer();
-                    promises.push(workPromise.promise);
-
-                    worksModel.create(work).then(() => {
-                        workPromise.resolve();
-                    });
-                });
-
-                Promises.all(promises).then(() => {
-                    console.log("Inserted artist, work and instruments.")
-
-                    // TODO - mapping instruments to artists, works to artists
-                    callback();
-                });
             });
     });
 };
+
+module.exports = populateFromImslp;
