@@ -9,6 +9,7 @@ module.exports = function (returnToMaster) {
     var page = 1,
         linkCounter = 1,
         total_links, total_records;
+    let firstIteration = false;
     var musicians = [];
     var url = "https://www.worldcat.org/search?q=dt%3Asco&fq=yr%3A1800&dblist=638&qt=page_number_link&start=" + page;
     console.log(url);
@@ -24,16 +25,18 @@ module.exports = function (returnToMaster) {
                 }
                 $ = cheerio.load(body);
                 // Finds total records
-                if (page == 1) {
+                if (!firstIteration) {
+                    let resultsinfoCounter = 0;
                     $('.resultsinfo strong').each(function () {
-                        if (i == 1) {
+                        if (resultsinfoCounter == 1) {
                             total_records = $(this).text();
                         }
-                        i = i + 1;
+                        resultsinfoCounter ++;
                     });
                     console.log("total records: " + total_records);
                     total_links = ceil((numeral(total_records)).value() / 10);
                     console.log("total links: " + total_links);
+                    firstIteration = true;
                 }
 
 
