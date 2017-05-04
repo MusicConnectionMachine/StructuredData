@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const uuid = require('uuid/v1');
 
+
 let populateFromImslp = (callback, postgresConnectionString) => {
     fs.readFile(path.join(__dirname, "composition-metadata.tsv"), 'utf8', (err,data) => {
         if (err) {
@@ -9,8 +10,8 @@ let populateFromImslp = (callback, postgresConnectionString) => {
         }
         data = data.split('\n');
 
-        let entityIds = [];
 
+        let entityIds = [];
         let artists = (() => {
             let list = [];
 
@@ -19,9 +20,11 @@ let populateFromImslp = (callback, postgresConnectionString) => {
                     let match = list.find((element)=>element.name === artist.name);
                     if(match === undefined){
                         list.push(artist);
+
                         entityIds.push({
                             id: artist.entityId
                         });
+
                         return artist.artistId;
                     } else {
                         return match.artistId;
@@ -43,9 +46,11 @@ let populateFromImslp = (callback, postgresConnectionString) => {
                     let match = list.find((element)=>element.artistId === instrument.artistId);
                     if(match === undefined) {
                         list.push(instrument);
+
                         entityIds.push({
                             id: instrument.entityId
                         });
+
                     }
                 },
                 getInstruments(){
@@ -96,7 +101,9 @@ let populateFromImslp = (callback, postgresConnectionString) => {
                     })(),
                     "artist_type":"composer",
                     "tag": [currentElement['Composer Time Period']],
+
                     "entityId": uuid()
+
                 };
 
                 artistId = artists.add(artist);
@@ -105,6 +112,7 @@ let populateFromImslp = (callback, postgresConnectionString) => {
                     currentElement['Instrumentation'].split(', ').forEach((instrument) => {
                         instruments.add({
                             name: instrument,
+
                             artistId: artistId,
                             entityId: uuid()
                         })
@@ -114,6 +122,7 @@ let populateFromImslp = (callback, postgresConnectionString) => {
 
             let work = {
                 "title": currentElement['Work Title'],
+
                 "artistId": artistId,
                 "entityId": uuid()
             };
