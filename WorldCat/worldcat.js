@@ -19,6 +19,8 @@ module.exports = function (returnToMaster) {
 
         console.log("Worldcat pushing " + url);
         request(url, function (error, response, body) {
+                linkCounter++;
+
                 if (error) {
                     console.log("Error while requesting worldcat: " + error)
                     return
@@ -31,7 +33,7 @@ module.exports = function (returnToMaster) {
                         if (resultsinfoCounter == 1) {
                             total_records = $(this).text();
                         }
-                        resultsinfoCounter ++;
+                        resultsinfoCounter++;
                     });
                     console.log("total records: " + total_records);
                     total_links = ceil((numeral(total_records)).value() / 10);
@@ -55,9 +57,9 @@ module.exports = function (returnToMaster) {
 
                 });
 
-                linkCounter++;
-
-                if (linkCounter > total_links) {
+                // worldcat only shows the first 5000 pages
+                console.log(linkCounter)
+                if (linkCounter == 500) {
                     clearInterval(refreshIntervalId);
                     var output = JSON.stringify(musicians); //convert it back to json
                     fs.writeFileSync('./scrapedoutput/worldcat/worldcat.json', output, 'utf8'); // write it back
@@ -67,6 +69,11 @@ module.exports = function (returnToMaster) {
         );
         page = page + 10;
         url = "https://www.worldcat.org/search?q=dt%3Asco&fq=yr%3A1800&dblist=638&qt=page_number_link&start=" + page;
+
+        // worldcat only shows the first 5000 pages
+        if (page > 5000) {
+            clearInterval(refreshIntervalId);
+        }
 
 
     }
