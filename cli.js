@@ -1,8 +1,3 @@
-/*
-When executing worldcat, use:
-node --max_old_space_size=4096 cli.js worldcat
- */
-
 const commander = require('commander');
 const path = require('path');
 const fs = require('fs');
